@@ -1,28 +1,45 @@
-"""Builds the Audit Code Blue icon (all Android sizes + adaptive layer) and launch screens into android-res/.
+"""Builds the Audit Code Blue icon (Code Blue CPR pictogram on blue) (all Android sizes + adaptive layer) and launch screens into android-res/.
 Run: python3 tools/make_icons.py"""
 from PIL import Image, ImageDraw, ImageFont
 import os, glob
 S = 2048; RED = (29, 78, 216); BG = (11, 15, 20); W = (255, 255, 255, 255); CUT = (0, 0, 0, 0)
 
 def pictogram():
-    """Clipboard with a tick and check lines — the quality audit."""
+    """Rescuer kneeling at the patient's side, facing the viewer, straight arms locked on the chest."""
     im = Image.new('RGBA', (S, S), CUT); d = ImageDraw.Draw(im)
-    # board
-    d.rounded_rectangle([430, 330, 1620, 1820], radius=120, fill=W)
-    d.rounded_rectangle([540, 470, 1510, 1710], radius=60, fill=CUT)
-    # clip
-    d.rounded_rectangle([760, 210, 1290, 470], radius=90, fill=W)
-    d.rounded_rectangle([890, 280, 1160, 360], radius=40, fill=CUT)
-    # three check rows: box + line
-    for i, y in enumerate((700, 1050, 1400)):
-        d.rounded_rectangle([640, y-90, 820, y+90], radius=34, fill=W)
-        d.rounded_rectangle([670, y-60, 790, y+60], radius=20, fill=CUT)
-        d.rounded_rectangle([900, y-38, 1400, y+38], radius=38, fill=W)
-        if i < 2:
-            w = 56
-            pts = [(665, y-5), (720, y+55), (845, y-110)]
-            d.line(pts, fill=W, width=w, joint='curve')
-            for c in pts: d.ellipse([c[0]-w/2, c[1]-w/2, c[0]+w/2, c[1]+w/2], fill=W)
+    def line(p, q, w, fill=W):
+        d.line([p, q], fill=fill, width=w)
+        for c in (p, q): d.ellipse([c[0]-w/2, c[1]-w/2, c[0]+w/2, c[1]+w/2], fill=fill)
+    # ground
+    d.rounded_rectangle([250, 1560, 1800, 1610], radius=25, fill=W)
+    # patient lying on back, head to the left
+    d.ellipse([330-125, 1400-125, 330+125, 1400+125], fill=W)
+    d.rounded_rectangle([480, 1335, 1780, 1470], radius=68, fill=W)
+    cx = 820                                   # chest level of the patient
+    # rescuer torso (behind the patient), shoulders over the chest
+    d.polygon([(cx-190, 800), (cx+190, 800), (cx+120, 1335), (cx-120, 1335)], fill=W)
+    d.rounded_rectangle([cx-200, 760, cx+200, 880], radius=60, fill=W)
+    # head
+    d.ellipse([cx-135, 470, cx+135, 740], fill=W)
+    # arms: straight, from shoulders converging to the hands; red gap separates them from the torso
+    for side in (-1, 1):
+        sh = (cx + side*235, 830); hand = (cx + side*45, 1290)
+        line(sh, hand, 150, fill=CUT)          # cut-out outline
+    d.polygon([(cx-190, 800), (cx+190, 800), (cx+120, 1335), (cx-120, 1335)], fill=W)
+    # re-cut the gaps between arms and torso
+    for side in (-1, 1):
+        sh = (cx + side*235, 830); hand = (cx + side*45, 1290)
+        line(sh, hand, 150, fill=CUT)
+    for side in (-1, 1):
+        sh = (cx + side*235, 830); hand = (cx + side*45, 1290)
+        line(sh, hand, 100)
+    d.ellipse([cx-135, 470, cx+135, 740], fill=W)
+    # stacked hands on the chest
+    d.rounded_rectangle([cx-120, 1250, cx+120, 1345], radius=45, fill=W)
+    # compression arrows on both sides
+    for x in (cx-430, cx+430):
+        d.rounded_rectangle([x-20, 930, x+20, 1110], radius=20, fill=W)
+        d.polygon([(x-64, 1100), (x+64, 1100), (x, 1200)], fill=W)
     return im.crop(im.getbbox())
 
 art = pictogram()

@@ -175,8 +175,8 @@
     footers(doc); return doc;
   }
 
-  function oneName(a) { return 'AuditCodeBlue_' + (a.kind || '') + '_' + (a.date || '') + '_' + ((a.times && a.times.arrest) || '').replace(':', '') + '.pdf'; }
-  function allName(filter) { return 'AuditCodeBlue_Report_' + (filter || 'All') + '_' + L().todayISO() + '.pdf'; }
+  function oneName(a) { return 'Audit Code Blue ' + (a.kind || '') + ' ' + (a.date || '') + ' ' + ((a.times && a.times.arrest) || '').replace(':', '') + '.pdf'; }
+  function allName(filter) { return 'Audit Code Blue Report ' + (filter || 'All') + ' ' + L().todayISO() + '.pdf'; }
 
   root.CBAPdf = { one: one, all: all, oneName: oneName, allName: allName, T: T };
 })(this);

@@ -4,9 +4,9 @@ const assert = require('assert');
 let passed = 0;
 function t(name, fn) { try { fn(); passed++; console.log('ok  ', name); } catch (e) { console.error('FAIL', name, '\n', e.message); process.exitCode = 1; } }
 
-t('checklist has all 88 items with unique ids', () => {
-  assert.strictEqual(L.ITEMS.length, 88);
-  assert.strictEqual(new Set(L.ITEMS.map(i => i.id)).size, 88);
+t('checklist has all 89 items with unique ids', () => {
+  assert.strictEqual(L.ITEMS.length, 89);
+  assert.strictEqual(new Set(L.ITEMS.map(i => i.id)).size, 89);
 });
 t('12-hour conversions', () => {
   assert.strictEqual(L.fmt12('00:05'), '12:05 AM');
@@ -35,7 +35,7 @@ t('correcting a time keeps the old value in the log', () => {
 });
 t('compliance excludes N/A and blanks', () => {
   const c = L.compliance({ checks: { '1.1': 'Y', '1.2': 'Y', '1.3': 'N', '1.4': 'NA' } });
-  assert.deepStrictEqual([c.y, c.n, c.na, c.blank, c.pct], [2, 1, 1, 84, 67]);
+  assert.deepStrictEqual([c.y, c.n, c.na, c.blank, c.pct], [2, 1, 1, 85, 67]);
   assert.strictEqual(L.compliance({ checks: { '1.1': 'NA' } }).pct, null);
 });
 t('KPIs across audits', () => {
