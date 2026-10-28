@@ -1,4 +1,4 @@
-# Code Blue Audit
+# Audit Code Blue
 
 Quality-team app for auditing real and mock Code Blue events.
 
@@ -12,7 +12,7 @@ Quality-team app for auditing real and mock Code Blue events.
 - Backup / import file to move audits between phones or combine the quality team's phones
 - Works offline; audits are stored on the phone
 
-**Android:** open the latest release on your phone and download `CodeBlueAudit.apk`.
+**Android:** open the latest release on your phone and download `AuditCodeBlue.apk`.
 
 **iPhone:** open https://kiranrajagopal-code.github.io/code-blue-audit/ in Safari → Share → Add to Home Screen.
 

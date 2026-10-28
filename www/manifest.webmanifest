@@ -1,6 +1,6 @@
 {
-  "name": "Code Blue Audit",
-  "short_name": "CB Audit",
+  "name": "Audit Code Blue",
+  "short_name": "Audit Code Blue",
   "description": "Quality audit of real and mock Code Blue — developed by Dr. Kiran Rajagopal",
   "start_url": "./",
   "scope": "./",

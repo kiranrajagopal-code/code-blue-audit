@@ -1,4 +1,4 @@
-/* Code Blue Audit — UI */
+/* Audit Code Blue — UI */
 (function () {
   'use strict';
   var L = window.CBA;
@@ -271,7 +271,7 @@
   $('btnBackup').addEventListener('click', function () {
     if (!audits.length) { toast('No audits to back up yet'); return; }
     var data = JSON.stringify({ app: 'code-blue-audit', version: 1, exportedAt: new Date().toISOString(), targets: targets, audits: audits });
-    shareFile('CodeBlueAudit_backup_' + L.todayISO() + '.json', 'application/json', data, true);
+    shareFile('AuditCodeBlue_backup_' + L.todayISO() + '.json', 'application/json', data, true);
   });
   $('btnImport').addEventListener('click', function () { $('importFile').value = ''; $('importFile').click(); });
   $('importFile').addEventListener('change', function () {
@@ -280,7 +280,7 @@
     r.onload = function () {
       try {
         var j = JSON.parse(r.result), inc = Array.isArray(j) ? j : j.audits;
-        if (!Array.isArray(inc)) throw new Error('not a Code Blue Audit backup');
+        if (!Array.isArray(inc)) throw new Error('not a Audit Code Blue backup');
         var m = L.mergeAudits(audits, inc); audits = m.list; persist(); renderHome();
         toast('Imported: ' + m.added + ' new, ' + m.updated + ' updated');
       } catch (e) { toast('Could not import: ' + e.message); }

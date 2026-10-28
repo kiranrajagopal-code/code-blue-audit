@@ -1,4 +1,4 @@
-/* Code Blue Audit — PDF reports (all audits with KPIs, or a single audit) */
+/* Audit Code Blue — PDF reports (all audits with KPIs, or a single audit) */
 (function (root) {
   'use strict';
   var OWNER = 'Dr. Kiran Rajagopal';
@@ -31,7 +31,7 @@
     for (var i = 1; i <= pages; i++) {
       doc.setPage(i); doc.setDrawColor(220); doc.line(M, H - 14, W - M, H - 14);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120);
-      doc.text(T('Code Blue Audit · Developed by ' + OWNER + ' · Generated ' + stamp()), M, H - 9);
+      doc.text(T('Audit Code Blue · Developed by ' + OWNER + ' · Generated ' + stamp()), M, H - 9);
       doc.text('Page ' + i + ' of ' + pages, W - M, H - 9, { align: 'right' });
     }
   }
@@ -105,7 +105,7 @@
 
   function one(a, targets) {
     var doc = newDoc();
-    band(doc, 'CODE BLUE AUDIT', (a.kind === 'Mock' ? 'Mock drill' : 'Real code') + ' · ' + L().fmtDate(a.date) + ' · ' + (a.location || ''));
+    band(doc, 'AUDIT CODE BLUE', (a.kind === 'Mock' ? 'Mock drill' : 'Real code') + ' · ' + L().fmtDate(a.date) + ' · ' + (a.location || ''));
     var y = auditPages(doc, a, targets, 28);
     signoff(doc, y);
     footers(doc); return doc;
@@ -122,7 +122,7 @@
     var C = L(), autoTable = at(), doc = newDoc(), k = C.kpis(list, targets);
     var dates = list.map(function (a) { return a.date; }).filter(Boolean).sort();
     var range = dates.length ? C.fmtDate(dates[0]) + ' to ' + C.fmtDate(dates[dates.length - 1]) : '';
-    band(doc, 'CODE BLUE AUDIT REPORT', (filter === 'All' ? 'Real + mock' : filter + ' only') + ' · ' + range);
+    band(doc, 'AUDIT CODE BLUE REPORT', (filter === 'All' ? 'Real + mock' : filter + ' only') + ' · ' + range);
     var y = heading(doc, 32, 'Key indicators (' + k.count + ' audits: ' + k.real + ' real, ' + k.mock + ' mock)');
     var med = function (v) { return v == null ? '-' : v + ' min'; };
     var pc = function (v) { return v == null ? '-' : v + '%'; };
@@ -175,8 +175,8 @@
     footers(doc); return doc;
   }
 
-  function oneName(a) { return 'CodeBlueAudit_' + (a.kind || '') + '_' + (a.date || '') + '_' + ((a.times && a.times.arrest) || '').replace(':', '') + '.pdf'; }
-  function allName(filter) { return 'CodeBlueAudit_Report_' + (filter || 'All') + '_' + L().todayISO() + '.pdf'; }
+  function oneName(a) { return 'AuditCodeBlue_' + (a.kind || '') + '_' + (a.date || '') + '_' + ((a.times && a.times.arrest) || '').replace(':', '') + '.pdf'; }
+  function allName(filter) { return 'AuditCodeBlue_Report_' + (filter || 'All') + '_' + L().todayISO() + '.pdf'; }
 
   root.CBAPdf = { one: one, all: all, oneName: oneName, allName: allName, T: T };
 })(this);

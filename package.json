@@ -2,7 +2,7 @@
   "name": "code-blue-audit",
   "version": "1.0.0",
   "private": true,
-  "description": "Code Blue Audit — quality monitoring of real and mock Code Blue",
+  "description": "Audit Code Blue — quality monitoring of real and mock Code Blue",
   "scripts": {
     "test": "node test/logic.test.js",
     "build": "esbuild src/native.js --bundle --format=iife --target=es2017 --minify --external:html2canvas --external:dompurify --external:canvg --outfile=www/native.js"

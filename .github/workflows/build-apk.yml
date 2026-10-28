@@ -59,18 +59,18 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
-          cp app/build/outputs/apk/debug/app-debug.apk ../CodeBlueAudit.apk
+          cp app/build/outputs/apk/debug/app-debug.apk ../AuditCodeBlue.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: CodeBlueAudit-apk
-          path: CodeBlueAudit.apk
+          name: AuditCodeBlue-apk
+          path: AuditCodeBlue.apk
 
       - name: Publish download
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: Code Blue Audit 1.0.${{ github.run_number }}
-          body: "Download **CodeBlueAudit.apk** below and open it on your Android phone to install."
-          files: CodeBlueAudit.apk
+          name: Audit Code Blue 1.0.${{ github.run_number }}
+          body: "Download **AuditCodeBlue.apk** below and open it on your Android phone to install."
+          files: AuditCodeBlue.apk
           make_latest: true

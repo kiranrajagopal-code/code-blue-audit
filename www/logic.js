@@ -1,4 +1,4 @@
-/* Code Blue Audit — checklist, time maths and KPIs (no UI).
+/* Audit Code Blue — checklist, time maths and KPIs (no UI).
  * Works in the browser (window.CBA) and in Node (module.exports) for tests.
  * Times are stored as 24-hour "HH:MM" strings on the audit date; intervals wrap past midnight. */
 (function (root) {

@@ -1,4 +1,4 @@
-"""Builds the Code Blue Audit icon (all Android sizes + adaptive layer) and launch screens into android-res/.
+"""Builds the Audit Code Blue icon (all Android sizes + adaptive layer) and launch screens into android-res/.
 Run: python3 tools/make_icons.py"""
 from PIL import Image, ImageDraw, ImageFont
 import os, glob
@@ -52,7 +52,7 @@ for folder, (w, h) in SPL.items():
     u = min(w, h); im = Image.new('RGBA', (w, h), BG+(255,)); d = ImageDraw.Draw(im)
     isz = int(u*0.34); top = int(h*0.5 - isz*0.85)
     im.alpha_composite(icon.resize((isz, isz), Image.LANCZOS), ((w-isz)//2, top))
-    d.text((w/2, top+isz+int(u*0.06)), 'Code Blue Audit', font=ImageFont.truetype(B, int(u*0.085)), fill=(255, 255, 255), anchor='mt')
+    d.text((w/2, top+isz+int(u*0.06)), 'Audit Code Blue', font=ImageFont.truetype(B, int(u*0.085)), fill=(255, 255, 255), anchor='mt')
     d.text((w/2, h-int(u*0.17)), 'Developed by', font=ImageFont.truetype(Rg, int(u*0.042)), fill=(138, 152, 170), anchor='mt')
     d.text((w/2, h-int(u*0.11)), 'Dr. Kiran Rajagopal', font=ImageFont.truetype(B, int(u*0.05)), fill=(255, 255, 255), anchor='mt')
     os.makedirs(f'{R}/{folder}', exist_ok=True); im.convert('RGB').save(f'{R}/{folder}/splash.png')
