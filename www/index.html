@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Code Blue Audit</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CB Audit">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- HOME -->
+<section id="home" class="screen">
+  <header class="home-head">
+    <img class="logo-img" src="icons/icon-192.png" alt="">
+    <h1>Code Blue Audit</h1>
+    <button class="icon-btn" id="btnTargets" aria-label="KPI targets">⚙</button>
+  </header>
+
+  <button id="btnNew" class="big-start">＋ NEW AUDIT</button>
+
+  <div class="seg" id="filter" role="group" aria-label="Show">
+    <button data-f="All" class="sel">All</button><button data-f="Real">Real</button><button data-f="Mock">Mock</button>
+  </div>
+
+  <div class="card">
+    <div class="label tight">Key indicators <span id="kpiCount" class="muted"></span></div>
+    <div class="kpis" id="kpis"></div>
+  </div>
+
+  <div class="card" id="phaseCard">
+    <div class="label tight">Compliance by phase</div>
+    <div id="phases"></div>
+    <div id="topNoWrap" class="hidden">
+      <div class="label">Most often marked NO</div>
+      <ol id="topNo" class="topno"></ol>
+    </div>
+  </div>
+
+  <button id="btnPdfAll" class="btn wide pdf">📄 EXPORT ALL — PDF</button>
+  <div class="row2">
+    <button id="btnBackup" class="btn">Backup data</button>
+    <button id="btnImport" class="btn">Import backup</button>
+  </div>
+  <input type="file" id="importFile" accept=".json,application/json" class="hidden">
+
+  <div class="card">
+    <div class="label tight">Audits</div>
+    <div id="list" class="history"><div class="muted">None yet. Tap NEW AUDIT when a Code Blue or mock drill begins.</div></div>
+  </div>
+
+  <div id="iosInstall" class="card warn hidden">
+    <b>Install on iPhone</b>
+    <p>In Safari, tap <b>Share</b> <span class="ios-share">⬆</span> → <b>Add to Home Screen</b> → <b>Add</b>. Then open Code Blue Audit from the home screen icon. Audits are saved on this phone; use Backup to keep a copy.</p>
+  </div>
+  <p class="disclaimer">Code Blue Audit · Developed by Dr. Kiran Rajagopal<br>Audits are stored on this device only. Use Backup data regularly.</p>
+</section>
+
+<!-- AUDIT -->
+<section id="audit" class="screen hidden">
+  <div class="topbar">
+    <button id="btnBack" class="back">‹ Audits</button>
+    <div class="score"><span id="scorePct">—</span><small>compliance</small></div>
+  </div>
+
+  <div class="card">
+    <div class="seg" id="kindSeg" role="group" aria-label="Type">
+      <button data-kind="Real">REAL CODE</button><button data-kind="Mock">MOCK DRILL</button>
+    </div>
+    <div class="grid2">
+      <label class="fld"><span class="label">Date</span><input id="fDate" type="date" class="input"></label>
+      <label class="fld"><span class="label">Initial rhythm</span>
+        <select id="fRhythm" class="input select"><option value="">— Select —</option><option>ASYSTOLE</option><option>PEA</option><option>VT</option><option>VF</option></select></label>
+    </div>
+    <label class="fld"><span class="label">Location / ward / bed</span><input id="fLocation" class="input" placeholder="e.g. MICU bed 4" autocomplete="off"></label>
+    <div class="grid2">
+      <label class="fld"><span class="label">Team leader</span><input id="fLeader" class="input" autocomplete="off"></label>
+      <label class="fld"><span class="label">Observer(s)</span><input id="fObservers" class="input" autocomplete="off"></label>
+    </div>
+  </div>
+
+  <div class="card times">
+    <div class="label tight">Times <span class="muted">· tap a time to correct it</span></div>
+    <div id="times"></div>
+    <div id="logWrap" class="hidden">
+      <div class="label">Time corrections</div>
+      <ul id="log" class="log"></ul>
+    </div>
+  </div>
+
+  <div class="label" style="margin-top:18px">Audit checklist <span class="muted" id="scoreSub"></span></div>
+  <div id="checklist"></div>
+
+  <button id="btnPdfOne" class="btn wide pdf">📄 EXPORT THIS AUDIT — PDF</button>
+  <button id="btnDelete" class="btn wide danger">Delete this audit</button>
+</section>
+
+<!-- MODAL -->
+<div id="modal" class="scrim hidden"><div class="modal" id="modalBody" role="dialog" aria-modal="true"></div></div>
+<div id="toast" class="toast hidden"></div>
+
+<script src="native.js"></script>
+<script src="logic.js"></script>
+<script src="pdf.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install
+        run: npm ci
+
+      - name: Test audit logic
+        run: npm test
+
+      - name: Bundle device bridge
+        run: npm run build
+
+      - name: Create Android project
+        run: |
+          npx cap add android
+          sed -i "s/versionCode 1$/versionCode ${{ github.run_number }}/; s/versionName \"1.0\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+
+      - name: App icon and launch screen
+        run: |
+          rm -f android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml android/app/src/main/res/drawable/ic_launcher_background.xml android/app/src/main/res/values/ic_launcher_background.xml
+          cp -r android-res/* android/app/src/main/res/
+          sed -i 's#<item name="android:background">@drawable/splash</item>#<item name="android:background">@drawable/splash</item>\n        <item name="windowSplashScreenBackground">\#0B0F14</item>#' android/app/src/main/res/values/styles.xml
+
+      - name: Sync web app into Android
+        run: npx cap sync android
+
+      - name: Fixed signing key (so updates install over the old app)
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          mkdir -p ~/.android
+          if [ -n "$KEYSTORE_B64" ]; then echo "$KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore; else base64 -d signing/app-signing.b64 > ~/.android/debug.keystore; fi
+
+      - name: Build APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../CodeBlueAudit.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CodeBlueAudit-apk
+          path: CodeBlueAudit.apk
+
+      - name: Publish download
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Code Blue Audit 1.0.${{ github.run_number }}
+          body: "Download **CodeBlueAudit.apk** below and open it on your Android phone to install."
+          files: CodeBlueAudit.apk
+          make_latest: true

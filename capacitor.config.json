@@ -1,0 +1,6 @@
+{
+  "appId": "in.drkiran.codeblueaudit",
+  "appName": "CB Audit",
+  "webDir": "www",
+  "android": { "backgroundColor": "#0b0f14" }
+}

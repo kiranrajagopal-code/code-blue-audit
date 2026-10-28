@@ -1,0 +1,23 @@
+{
+  "name": "code-blue-audit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Code Blue Audit — quality monitoring of real and mock Code Blue",
+  "scripts": {
+    "test": "node test/logic.test.js",
+    "build": "esbuild src/native.js --bundle --format=iife --target=es2017 --minify --external:html2canvas --external:dompurify --external:canvg --outfile=www/native.js"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/share": "8.0.3",
+    "jspdf": "4.2.1",
+    "jspdf-autotable": "5.0.9"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3",
+    "esbuild": "0.28.2"
+  }
+}
