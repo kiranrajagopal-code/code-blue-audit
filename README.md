@@ -1,4 +1,6 @@
 # Audit Code Blue
+[![DOI](https://zenodo.org/badge/1436667920.svg)](https://doi.org/10.5281/zenodo.23735875)
+
 
 Quality-team app for auditing real and mock Code Blue events.
 
