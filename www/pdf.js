@@ -95,9 +95,16 @@
       columnStyles: { 0: { cellWidth: 11 }, 1: { cellWidth: 92 }, 2: { cellWidth: 16, halign: 'center', fontStyle: 'bold' } },
       body: body,
       didParseCell: function (d) {
-        if (d.section !== 'body' || d.column.index !== 2) return;
-        var v = d.cell.raw;
-        if (v === 'YES') d.cell.styles.textColor = GREEN; else if (v === 'NO') { d.cell.styles.textColor = 255; d.cell.styles.fillColor = RED; } else if (v === 'N/A') d.cell.styles.textColor = GRAY;
+        if (d.section !== 'body') return;
+        var v = d.row.raw[2];
+        // a deviation (NO): the whole row in red so it stands out on the printout
+        if (v === 'NO') {
+          d.cell.styles.fillColor = d.column.index === 2 ? RED : [254, 226, 226];
+          d.cell.styles.textColor = d.column.index === 2 ? 255 : RED;
+          d.cell.styles.fontStyle = 'bold';
+        } else if (d.column.index === 2) {
+          if (v === 'YES') d.cell.styles.textColor = GREEN; else if (v === 'N/A') d.cell.styles.textColor = GRAY;
+        }
       }
     });
     return doc.lastAutoTable.finalY;
