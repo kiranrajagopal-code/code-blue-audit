@@ -33,10 +33,10 @@ t('correcting a time keeps the old value in the log', () => {
   assert.strictEqual(a.log[0].from, '10:02');
   assert.strictEqual(L.setTime(a, 'called', '10:01'), false);
 });
-t('compliance excludes N/A and blanks', () => {
-  const c = L.compliance({ checks: { '1.1': 'Y', '1.2': 'Y', '1.3': 'N', '1.4': 'NA' } });
-  assert.deepStrictEqual([c.y, c.n, c.na, c.blank, c.pct], [2, 1, 1, 85, 67]);
-  assert.strictEqual(L.compliance({ checks: { '1.1': 'NA' } }).pct, null);
+t('unmarked items count as YES; N/A excluded', () => {
+  const c = L.compliance({ checks: { '1.1': 'Y', '1.3': 'N', '1.4': 'NA' } });
+  assert.deepStrictEqual([c.y, c.n, c.na, c.pct], [87, 1, 1, 99]);
+  assert.strictEqual(L.compliance({ checks: {} }).pct, 100);
 });
 t('KPIs across audits', () => {
   const mk = (kind, times, outcome, checks) => ({ kind, times, outcome, status: outcome ? 'closed' : 'open', checks });
@@ -52,9 +52,9 @@ t('KPIs across audits', () => {
   assert.strictEqual(k.team.median, 3.5); assert.strictEqual(k.team.within, 50);
   assert.strictEqual(k.outcome.roscPct, 50);
   assert.strictEqual(k.duration.median, 16.5);
-  assert.strictEqual(k.compliance.mean, Math.round((50 + 50 + 100) / 3));
+  assert.strictEqual(k.compliance.mean, Math.round((99 + 99 + 100) / 3));
   assert.strictEqual(k.topNo[0].id, '1.3'); assert.strictEqual(k.topNo[0].count, 2);
-  assert.strictEqual(k.sections[0].pct, 60);
+  assert.strictEqual(k.sections[0].pct, Math.round(22 / 24 * 100));
 });
 t('backup merge: newer copy wins, new ones added', () => {
   const a = { id: 'x', times: {}, updatedAt: '2026-10-01', location: 'old' };

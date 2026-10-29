@@ -147,8 +147,9 @@
 
   function compliance(a) {
     var y = 0, n = 0, na = 0, c = (a && a.checks) || {};
-    ITEMS.forEach(function (it) { var v = c[it.id]; if (v === 'Y') y++; else if (v === 'N') n++; else if (v === 'NA') na++; });
-    return { y: y, n: n, na: na, blank: ITEMS.length - y - n - na, pct: y + n ? Math.round(y / (y + n) * 100) : null };
+    // Only NO and N/A need marking: any item left unmarked counts as YES
+    ITEMS.forEach(function (it) { var v = c[it.id]; if (v === 'N') n++; else if (v === 'NA') na++; else y++; });
+    return { y: y, n: n, na: na, pct: y + n ? Math.round(y / (y + n) * 100) : null };
   }
   function intervals(a) {
     var t = (a && a.times) || {};
@@ -192,7 +193,7 @@
     var secY = SECTIONS.map(function () { return 0; }), secT = SECTIONS.map(function () { return 0; }), no = {};
     list.forEach(function (a) {
       ITEMS.forEach(function (it) {
-        var v = a.checks && a.checks[it.id];
+        var v = (a.checks && a.checks[it.id]) || 'Y';
         if (v === 'Y' || v === 'N') { secT[it.sec]++; if (v === 'Y') secY[it.sec]++; else no[it.id] = (no[it.id] || 0) + 1; }
       });
     });

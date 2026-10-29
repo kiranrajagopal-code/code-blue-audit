@@ -82,7 +82,7 @@
   function renderScore() {
     var c = L.compliance(cur());
     $('scorePct').textContent = c.pct == null ? '—' : c.pct + '%';
-    $('scoreSub').textContent = '· ' + c.y + ' yes · ' + c.n + ' no · ' + c.na + ' N/A · ' + c.blank + ' blank';
+    $('scoreSub').textContent = '· mark only NO or N/A; unmarked = YES · ' + c.n + ' no · ' + c.na + ' N/A';
   }
   function ivBadge(v, t, from) { if (v == null) return ''; return '<span class="iv ' + (v <= t ? 'ok' : 'bad') + '">' + L.fmtMin(v) + ' ' + from + ' · target ≤' + t + '</span>'; }
   function renderTimes() {
@@ -115,11 +115,14 @@
       return '<li><b>' + esc(l.label) + '</b>: ' + (L.fmt12(l.from) || '—') + ' → ' + (L.fmt12(l.to) || 'cleared') + ' <span>(corrected ' + L.fmtDate(L.todayISO(d)) + ', ' + L.fmt12(L.nowHM(d)) + ')</span></li>';
     }).join('');
   }
+  function secCount(a, s) {
+    var n = s[1].filter(function (i) { return a.checks[i[0]] === 'N'; }).length, na = s[1].filter(function (i) { return a.checks[i[0]] === 'NA'; }).length;
+    return (n ? n + ' NO' : '') + (n && na ? ' · ' : '') + (na ? na + ' N/A' : '') || 'all YES';
+  }
   function renderChecklist() {
     var a = cur();
     $('checklist').innerHTML = L.SECTIONS.map(function (s, si) {
-      var done = s[1].filter(function (i) { return a.checks[i[0]]; }).length;
-      return '<div class="sec" data-sec="' + si + '"><h3>' + (si + 1) + '. ' + esc(s[0]) + '<small>' + done + '/' + s[1].length + '</small></h3>' +
+      return '<div class="sec" data-sec="' + si + '"><h3>' + (si + 1) + '. ' + esc(s[0]) + '<small>' + secCount(a, s) + '</small></h3>' +
         s[1].map(function (i) {
           var v = a.checks[i[0]] || '', r = a.remarks[i[0]] || '';
           return '<div class="it' + (v === 'N' ? ' isN' : '') + '" data-item="' + i[0] + '"><div class="q"><span class="n">' + i[0] + '</span><span>' + esc(i[1]) + '</span></div>' +
@@ -191,7 +194,7 @@
     Array.prototype.forEach.call(row.querySelectorAll('[data-yn]'), function (x) { x.classList.toggle('sel', x.dataset.yn === nv); x.setAttribute('aria-pressed', x.dataset.yn === nv); });
     row.classList.toggle('isN', nv === 'N');
     var sec = row.closest('.sec'), si = +sec.dataset.sec, s = L.SECTIONS[si];
-    sec.querySelector('h3 small').textContent = s[1].filter(function (i) { return a.checks[i[0]]; }).length + '/' + s[1].length;
+    sec.querySelector('h3 small').textContent = secCount(a, s);
     renderScore();
   });
   var remT = null;

@@ -49,7 +49,7 @@
         ['Type', a.kind === 'Mock' ? 'MOCK DRILL' : 'REAL CODE', 'Date', C.fmtDate(a.date)],
         ['Location / bed', T(a.location || '-'), 'Initial rhythm', a.rhythm || '-'],
         ['Team leader', T(a.leader || '-'), 'Observer(s)', T(a.observers || '-')],
-        ['Outcome', a.status === 'closed' ? (a.outcome || '-').toUpperCase() : 'In progress', 'Compliance', (c.pct == null ? '-' : c.pct + '%') + '  (' + c.y + ' yes, ' + c.n + ' no, ' + c.na + ' N/A, ' + c.blank + ' blank)']
+        ['Outcome', a.status === 'closed' ? (a.outcome || '-').toUpperCase() : 'In progress', 'Compliance', (c.pct == null ? '-' : c.pct + '%') + '  (' + c.y + ' yes, ' + c.n + ' no, ' + c.na + ' N/A)']
       ]
     });
     y = heading(doc, doc.lastAutoTable.finalY + 8, 'Times');
@@ -91,13 +91,13 @@
         body: a.log.map(function (l) { var d = new Date(l.at); return [T(l.label), C.fmt12(l.from) || '-', C.fmt12(l.to) || 'cleared', C.fmtDate(C.todayISO(d)) + ', ' + C.fmt12(C.nowHM(d))]; })
       });
     }
-    y = heading(doc, doc.lastAutoTable.finalY + 8, 'Audit checklist');
+    y = heading(doc, doc.lastAutoTable.finalY + 8, 'Audit checklist (items not marked NO or N/A are recorded as YES)');
     var body = [];
     C.SECTIONS.forEach(function (s, si) {
       body.push([{ content: (si + 1) + '. ' + T(s[0]).toUpperCase(), colSpan: 4, styles: { fillColor: [226, 232, 240], fontStyle: 'bold', textColor: 20 } }]);
       s[1].forEach(function (i) {
         var v = a.checks && a.checks[i[0]];
-        body.push([i[0], T(i[1]), v ? C.ANS[v] : '', T((a.remarks && a.remarks[i[0]]) || '')]);
+        body.push([i[0], T(i[1]), C.ANS[v || 'Y'], T((a.remarks && a.remarks[i[0]]) || '')]);
       });
     });
     autoTable(doc, {
