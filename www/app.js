@@ -92,6 +92,7 @@
       if (T.key === 'called') right = ivBadge(iv.called, targets.called, 'after arrest');
       if (T.key === 'cpr') right = ivBadge(iv.cpr, targets.cpr, 'after arrest');
       if (T.key === 'team') right = ivBadge(iv.team, targets.team, 'after Code Blue');
+      if (T.key === 'adr' && iv.firstAdr != null) right = '<span class="iv">' + L.fmtMin(iv.firstAdr) + ' after arrest</span>';
       if (T.key === 'end') {
         if (a.status !== 'closed') return '<div class="trow"><div><div class="tname">' + T.label + '</div><div class="thint">Records the time and asks: ROSC or death?</div></div><div></div>' +
           '<div class="tval"><button class="btn end wide" data-end style="margin:0">END CODE BLUE</button></div></div>';
@@ -102,6 +103,11 @@
       return '<div class="trow"><div><div class="tname">' + T.label + '</div><div class="thint">' + T.hint + '</div></div><div>' + right + '</div>' +
         '<div class="tval"><button class="tclock' + (v ? '' : ' empty') + '" data-edit="' + T.key + '">' + (v ? L.fmt12(v) : 'Not set — tap to enter') + '</button><button class="tnow" data-now="' + T.key + '">NOW</button></div></div>';
     }).join('');
+    var ex = L.expected(a);
+    $('expected').innerHTML = (ex.cycles == null && ex.doses == null) ? '' :
+      '<div class="label">Expected as per protocol</div><div class="exp">' +
+      '<div><b>' + (ex.cycles == null ? '—' : ex.cycles) + '</b><span>CPR cycles / pulse checks / compressor switches</span><small>' + (ex.cycles == null ? 'Needs CPR start + termination' : ex.cprMin + ' min CPR ÷ 2 min') + '</small></div>' +
+      '<div><b>' + (ex.doses == null ? '—' : ex.doses) + '</b><span>doses of adrenaline 1 mg</span><small>' + (ex.doses == null ? 'Needs first adrenaline + termination' : 'Every 4 min: ' + ex.doseTimes.map(L.fmt12).join(', ')) + '</small></div></div>';
     var log = a.log || [];
     $('logWrap').classList.toggle('hidden', !log.length);
     $('log').innerHTML = log.slice().reverse().map(function (l) {

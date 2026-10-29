@@ -62,6 +62,7 @@
         ['Code Blue initiated', C.fmt12(t.called) || '-', 'Arrest -> Code Blue: ' + iv(x.called, targets.called)],
         ['CPR initiated', C.fmt12(t.cpr) || '-', 'Arrest -> CPR: ' + iv(x.cpr, targets.cpr)],
         ['Code Blue team arrival', C.fmt12(t.team) || '-', 'Code Blue -> team: ' + iv(x.team, targets.team)],
+        ['First dose of adrenaline', C.fmt12(t.adr) || '-', 'Arrest -> first adrenaline: ' + iv(x.firstAdr, null)],
         ['Termination of Code Blue', C.fmt12(t.end) || '-', 'Duration from CPR start: ' + iv(x.duration, null)]
       ],
       didParseCell: function (d) {
@@ -70,6 +71,17 @@
           if (/within target/.test(s)) d.cell.styles.textColor = GREEN; else if (/target <=/.test(s)) d.cell.styles.textColor = RED;
         }
       }
+    });
+    var ex = C.expected(a);
+    y = heading(doc, doc.lastAutoTable.finalY + 8, 'Expected as per protocol (cycle every 2 min, adrenaline every 4 min)');
+    autoTable(doc, {
+      startY: y, theme: 'grid', margin: { left: M, right: M }, headStyles: { fillColor: DARK },
+      styles: { fontSize: 9, cellPadding: 2 }, columnStyles: { 0: { cellWidth: 60, fontStyle: 'bold' }, 1: { cellWidth: 32, halign: 'center', fontStyle: 'bold' } },
+      head: [['Item', 'Expected', 'Basis']],
+      body: [
+        ['CPR cycles (pulse checks / compressor switches)', ex.cycles == null ? '-' : String(ex.cycles), ex.cycles == null ? 'Enter CPR initiated and termination times' : 'CPR ' + C.fmt12(t.cpr) + ' to ' + C.fmt12(t.end) + ' = ' + ex.cprMin + ' min / 2 min'],
+        ['Doses of adrenaline 1 mg', ex.doses == null ? '-' : String(ex.doses), ex.doses == null ? 'Enter first adrenaline and termination times' : 'First dose ' + C.fmt12(t.adr) + ' to ' + (a.outcome === 'ROSC' ? 'ROSC' : 'termination') + ' ' + C.fmt12(t.end) + ' = ' + ex.adrMin + ' min; due at ' + ex.doseTimes.map(C.fmt12).join(', ')]
+      ]
     });
     if (a.log && a.log.length) {
       y = heading(doc, doc.lastAutoTable.finalY + 8, 'Time corrections');
@@ -167,11 +179,11 @@
     y = heading(doc, doc.lastAutoTable.finalY + 8, 'All audits');
     autoTable(doc, {
       startY: y, theme: 'grid', margin: { left: M, right: M, bottom: 20 }, headStyles: { fillColor: DARK, fontSize: 7.5 }, styles: { fontSize: 7.5, cellPadding: 1.4 },
-      head: [['Date', 'Type', 'Location', 'Rhythm', 'Arrest', 'Code Blue', 'CPR', 'Team', 'End', 'Outcome', 'Compl.']],
+      head: [['Date', 'Type', 'Location', 'Rhythm', 'Arrest', 'Code Blue', 'CPR', 'Team', '1st Adr', 'End', 'Outcome', 'Exp. cycles', 'Exp. Adr', 'Compl.']],
       body: list.map(function (a) {
-        var t = a.times || {}, c = C.compliance(a);
-        return [C.fmtDate(a.date), a.kind, T(a.location || '-'), a.rhythm || '-', C.fmt12(t.arrest) || '-', C.fmt12(t.called) || '-', C.fmt12(t.cpr) || '-', C.fmt12(t.team) || '-', C.fmt12(t.end) || '-',
-          a.status === 'closed' ? (a.outcome || '-') : 'Open', c.pct == null ? '-' : c.pct + '%'];
+        var t = a.times || {}, c = C.compliance(a), ex = C.expected(a);
+        return [C.fmtDate(a.date), a.kind, T(a.location || '-'), a.rhythm || '-', C.fmt12(t.arrest) || '-', C.fmt12(t.called) || '-', C.fmt12(t.cpr) || '-', C.fmt12(t.team) || '-', C.fmt12(t.adr) || '-', C.fmt12(t.end) || '-',
+          a.status === 'closed' ? (a.outcome || '-') : 'Open', ex.cycles == null ? '-' : ex.cycles, ex.doses == null ? '-' : ex.doses, c.pct == null ? '-' : c.pct + '%'];
       })
     });
     list.forEach(function (a, i) {

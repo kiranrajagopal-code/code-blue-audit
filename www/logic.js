@@ -114,6 +114,7 @@
     { key: 'called', label: 'Code Blue initiated', hint: 'Announcement made' },
     { key: 'cpr', label: 'CPR initiated', hint: 'First compression' },
     { key: 'team', label: 'Code Blue team arrival', hint: 'Team at bedside' },
+    { key: 'adr', label: 'First dose of adrenaline', hint: 'Adrenaline 1 mg given' },
     { key: 'end', label: 'Termination of Code Blue', hint: 'ROSC or death declared' }
   ];
   var DEFAULT_TARGETS = { called: 1, cpr: 1, team: 3 };
@@ -155,9 +156,24 @@
       called: diff(t.arrest, t.called),
       cpr: diff(t.arrest, t.cpr),
       team: diff(t.called, t.team),
-      duration: diff(t.cpr || t.arrest, t.end)
+      duration: diff(t.cpr || t.arrest, t.end),
+      firstAdr: diff(t.arrest, t.adr)
     };
   }
+  /* Expected counts by the rules: pulse check + compressor switch every 2 min from CPR start,
+     adrenaline 1 mg every 4 min from the first dose, until termination (ROSC / death).
+     A check or dose falling exactly at the termination minute is not counted. */
+  var CYCLE_MIN = 2, ADR_MIN = 4;
+  function expected(a) {
+    var t = (a && a.times) || {};
+    var cprMin = diff(t.cpr, t.end), adrMin = diff(t.adr, t.end);
+    var cycles = cprMin != null && cprMin >= 0 ? Math.floor(cprMin / CYCLE_MIN) : null;
+    var doses = adrMin != null && adrMin >= 0 ? Math.max(1, Math.ceil(adrMin / ADR_MIN)) : null;
+    var doseTimes = [];
+    if (doses != null) for (var i = 0; i < doses; i++) doseTimes.push(addMin(t.adr, i * ADR_MIN));
+    return { cprMin: cprMin, cycles: cycles, adrMin: adrMin, doses: doses, doseTimes: doseTimes };
+  }
+  function addMin(hm, m) { var x = (toMin(hm) + m) % 1440; return pad(Math.floor(x / 60)) + ':' + pad(x % 60); }
   function median(arr) {
     if (!arr.length) return null;
     var s = arr.slice().sort(function (x, y) { return x - y; }), h = s.length >> 1;
@@ -241,7 +257,7 @@
     SECTIONS: SECTIONS, ITEMS: ITEMS, RHYTHMS: RHYTHMS, TIMES: TIMES, DEFAULT_TARGETS: DEFAULT_TARGETS, ANS: ANS,
     pad: pad, diff: diff, fmt12: fmt12, from12: from12, split12: split12, nowHM: nowHM, todayISO: todayISO,
     fmtDate: fmtDate, fmtMin: fmtMin, compliance: compliance, intervals: intervals, median: median, kpis: kpis,
-    newAudit: newAudit, setTime: setTime, sortAudits: sortAudits, mergeAudits: mergeAudits
+    newAudit: newAudit, expected: expected, CYCLE_MIN: CYCLE_MIN, ADR_MIN: ADR_MIN, setTime: setTime, sortAudits: sortAudits, mergeAudits: mergeAudits
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.CBA = api;
 })(this);

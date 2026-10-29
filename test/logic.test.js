@@ -20,7 +20,7 @@ t('intervals, including across midnight', () => {
   assert.strictEqual(L.diff('10:00', '10:01'), 1);
   assert.strictEqual(L.diff('23:58', '00:03'), 5);
   const a = { times: { arrest: '10:00', called: '10:01', cpr: '10:00', team: '10:04', end: '10:30' } };
-  assert.deepStrictEqual(L.intervals(a), { called: 1, cpr: 0, team: 3, duration: 30 });
+  assert.deepStrictEqual(L.intervals(a), { called: 1, cpr: 0, team: 3, duration: 30, firstAdr: null });
 });
 t('correcting a time keeps the old value in the log', () => {
   const a = L.newAudit(new Date(2026, 9, 28, 10, 0));
@@ -61,5 +61,13 @@ t('backup merge: newer copy wins, new ones added', () => {
   const m = L.mergeAudits([a], [{ id: 'x', times: {}, updatedAt: '2026-10-02', location: 'new' }, { id: 'y', times: {}, updatedAt: '2026-10-01' }]);
   assert.strictEqual(m.added, 1); assert.strictEqual(m.updated, 1);
   assert.strictEqual(m.list.find(z => z.id === 'x').location, 'new');
+});
+t('expected cycles and adrenaline doses', () => {
+  const e = L.expected({ times: { cpr: '10:00', adr: '10:05', end: '10:32' } });
+  assert.strictEqual(e.cycles, 16); assert.strictEqual(e.doses, 7);
+  assert.deepStrictEqual(e.doseTimes, ['10:05', '10:09', '10:13', '10:17', '10:21', '10:25', '10:29']);
+  assert.strictEqual(L.expected({ times: { cpr: '10:00', adr: '10:04', end: '10:12' } }).doses, 2); // dose at 10:12 = termination, not counted
+  assert.strictEqual(L.expected({ times: { cpr: '23:58', adr: '23:59', end: '00:07' } }).cycles, 4);
+  assert.strictEqual(L.expected({ times: { cpr: '10:00' } }).cycles, null);
 });
 console.log(passed + ' passed');
