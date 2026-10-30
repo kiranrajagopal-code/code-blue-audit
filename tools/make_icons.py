@@ -45,7 +45,7 @@ def pictogram():
 art = pictogram()
 from PIL import ImageFilter, ImageChops
 TOP = (37, 99, 235); MID = (23, 64, 182); DEEP = (7, 22, 66)
-FX = 'tools/fonts/manrope-XB.ttf'; FM = 'tools/fonts/manrope-M.ttf'
+FX = 'tools/fonts/jakarta-XB.ttf'; FM = 'tools/fonts/jakarta-M.ttf'
 
 def gradient(w, h):
     """Diagonal royal-to-midnight blue with a soft light from the top-left."""
