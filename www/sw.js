@@ -1,8 +1,8 @@
 /* Audit Code Blue offline cache: app works with no network (e.g. in the ICU).
    Serves from cache instantly, refreshes the cache in the background, so updates appear on the next open. */
-var CACHE = 'cbaudit-v9';
+var CACHE = 'cbaudit-v10';
 var FILES = ['./', 'index.html', 'app.css', 'native.js', 'logic.js', 'pdf.js', 'app.js', 'manifest.webmanifest',
-  'icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png'];
+  'icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png', 'fonts/manrope.woff2'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
 });

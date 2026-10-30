@@ -3,107 +3,130 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#0b1d51">
 <title>Audit Code Blue</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Audit Code Blue">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
+<link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-gear" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 15V4m0 0L8 8m4-4 4 4M5 20h14"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m15 5-7 7 7 7"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m4 6 1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M11 6h9M11 12h9M11 18h9"/></symbol>
+</svg>
+
 <!-- HOME -->
 <section id="home" class="screen">
-  <header class="home-head">
-    <img class="logo-img" src="icons/icon-192.png" alt="">
-    <h1>Audit Code Blue</h1>
-    <button class="icon-btn" id="btnTargets" aria-label="KPI targets">⚙</button>
+  <header class="hero">
+    <div class="hero-top">
+      <img class="app-ico" src="icons/icon-192.png" alt="">
+      <div class="brand"><h1>Audit Code Blue</h1><p>Code Blue quality audit</p></div>
+      <button class="icon-btn" id="btnTargets" aria-label="KPI targets"><svg><use href="#i-gear"/></svg></button>
+    </div>
+    <div class="hero-stats">
+      <div id="heroRing" class="hero-ring"></div>
+      <div class="hero-figs">
+        <div class="hero-cap">Checklist compliance</div>
+        <div class="figs"><div><b id="hCount">0</b><span>Audits</span></div><div><b id="hReal">0</b><span>Real</span></div><div><b id="hMock">0</b><span>Mock</span></div></div>
+      </div>
+    </div>
+    <button id="btnNew" class="cta"><svg><use href="#i-plus"/></svg>New audit</button>
   </header>
 
-  <button id="btnNew" class="big-start">＋ NEW AUDIT</button>
-
-  <div class="seg" id="filter" role="group" aria-label="Show">
-    <button data-f="All" class="sel">All</button><button data-f="Real">Real</button><button data-f="Mock">Mock</button>
-  </div>
-
-  <div class="card">
-    <div class="label tight">Key indicators <span id="kpiCount" class="muted"></span></div>
-    <div class="kpis" id="kpis"></div>
-  </div>
-
-  <div class="card" id="phaseCard">
-    <div class="label tight">Compliance by phase</div>
-    <div id="phases"></div>
-    <div id="topNoWrap" class="hidden">
-      <div class="label">Most often marked NO</div>
-      <ol id="topNo" class="topno"></ol>
+  <div class="wrap">
+    <div class="seg" id="filter" role="group" aria-label="Show">
+      <button data-f="All" class="sel">All</button><button data-f="Real">Real</button><button data-f="Mock">Mock</button>
     </div>
-  </div>
 
-  <button id="btnPdfAll" class="btn wide pdf">📄 EXPORT ALL — PDF</button>
-  <div class="row2">
-    <button id="btnBackup" class="btn">Backup data</button>
-    <button id="btnImport" class="btn">Import backup</button>
-  </div>
-  <input type="file" id="importFile" accept=".json,application/json" class="hidden">
+    <div class="sec-title">Key indicators <span id="kpiCount"></span></div>
+    <div class="kpis" id="kpis"></div>
 
-  <div class="card">
-    <div class="label tight">Audits</div>
-    <div id="list" class="history"><div class="muted">None yet. Tap NEW AUDIT when a Code Blue or mock drill begins.</div></div>
-  </div>
+    <div class="card" id="phaseCard">
+      <div class="card-title">Compliance by phase</div>
+      <div id="phases"></div>
+      <div id="topNoWrap" class="hidden">
+        <div class="card-title sub">Most often marked NO</div>
+        <ol id="topNo" class="topno"></ol>
+      </div>
+    </div>
 
-  <div id="iosInstall" class="card warn hidden">
-    <b>Install on iPhone</b>
-    <p>In Safari, tap <b>Share</b> <span class="ios-share">⬆</span> → <b>Add to Home Screen</b> → <b>Add</b>. Then open Audit Code Blue from the home screen icon. Audits are saved on this phone; use Backup to keep a copy.</p>
+    <button id="btnPdfAll" class="btn wide pdf"><svg><use href="#i-doc"/></svg><span>Export all — PDF report</span></button>
+    <div class="row2">
+      <button id="btnBackup" class="btn ghost"><svg><use href="#i-down"/></svg><span>Backup data</span></button>
+      <button id="btnImport" class="btn ghost"><svg><use href="#i-up"/></svg><span>Import backup</span></button>
+    </div>
+    <input type="file" id="importFile" accept=".json,application/json" class="hidden">
+
+    <div class="sec-title">Audits</div>
+    <div id="list" class="history"></div>
+
+    <div id="iosInstall" class="card warn hidden">
+      <b>Install on iPhone</b>
+      <p>In Safari, tap <b>Share</b> <span class="ios-share">⬆</span> → <b>Add to Home Screen</b> → <b>Add</b>. Then open Audit Code Blue from the home screen icon. Audits are saved on this phone; use Backup to keep a copy.</p>
+    </div>
+    <p class="disclaimer">Audits are stored on this device only. Use Backup data regularly.</p>
   </div>
-  <p class="disclaimer">Audits are stored on this device only. Use Backup data regularly.</p>
   <footer class="owner fixed">Developed by <b>Dr. Kiran Rajagopal</b></footer>
 </section>
 
 <!-- AUDIT -->
 <section id="audit" class="screen hidden">
-  <div class="topbar">
-    <button id="btnBack" class="back">‹ Audits</button>
-    <div class="score"><span id="scorePct">—</span><small>compliance</small></div>
+  <header class="appbar">
+    <button id="btnBack" class="back" aria-label="Back to audits"><svg><use href="#i-back"/></svg></button>
+    <div class="ab-title"><b id="abTitle">Audit</b><span id="abSub"></span></div>
+    <div class="score" id="scoreRing" aria-label="Compliance"></div>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="seg" id="kindSeg" role="group" aria-label="Type">
+        <button data-kind="Real">Real code</button><button data-kind="Mock">Mock drill</button>
+      </div>
+      <div class="grid2">
+        <label class="fld"><span class="label">Date</span><input id="fDate" type="date" class="input"></label>
+        <label class="fld"><span class="label">Initial rhythm</span>
+          <select id="fRhythm" class="input select"><option value="">Select</option><option>ASYSTOLE</option><option>PEA</option><option>VT</option><option>VF</option></select></label>
+      </div>
+      <label class="fld"><span class="label">Location / ward / bed</span><input id="fLocation" class="input" placeholder="e.g. MICU bed 4" autocomplete="off"></label>
+      <div class="grid2">
+        <label class="fld"><span class="label">Team leader</span><input id="fLeader" class="input" autocomplete="off"></label>
+        <label class="fld"><span class="label">Observer(s)</span><input id="fObservers" class="input" autocomplete="off"></label>
+      </div>
+    </div>
+
+    <div class="card times dark">
+      <div class="times-head"><svg><use href="#i-clock"/></svg><b>Times</b><span>Tap a time to correct it</span></div>
+      <div id="times"></div>
+      <div id="expected"></div>
+      <div id="logWrap" class="hidden">
+        <div class="label">Time corrections</div>
+        <ul id="log" class="log"></ul>
+      </div>
+    </div>
+
+    <div class="sec-title"><svg><use href="#i-list"/></svg>Audit checklist</div>
+    <div class="hint" id="scoreSub"></div>
+    <div id="checklist"></div>
+
+    <button id="btnPdfOne" class="btn wide pdf"><svg><use href="#i-doc"/></svg><span>Export this audit — PDF</span></button>
+    <button id="btnDelete" class="btn wide danger"><svg><use href="#i-trash"/></svg><span>Delete this audit</span></button>
+    <footer class="owner">Developed by <b>Dr. Kiran Rajagopal</b></footer>
   </div>
-
-  <div class="card">
-    <div class="seg" id="kindSeg" role="group" aria-label="Type">
-      <button data-kind="Real">REAL CODE</button><button data-kind="Mock">MOCK DRILL</button>
-    </div>
-    <div class="grid2">
-      <label class="fld"><span class="label">Date</span><input id="fDate" type="date" class="input"></label>
-      <label class="fld"><span class="label">Initial rhythm</span>
-        <select id="fRhythm" class="input select"><option value="">— Select —</option><option>ASYSTOLE</option><option>PEA</option><option>VT</option><option>VF</option></select></label>
-    </div>
-    <label class="fld"><span class="label">Location / ward / bed</span><input id="fLocation" class="input" placeholder="e.g. MICU bed 4" autocomplete="off"></label>
-    <div class="grid2">
-      <label class="fld"><span class="label">Team leader</span><input id="fLeader" class="input" autocomplete="off"></label>
-      <label class="fld"><span class="label">Observer(s)</span><input id="fObservers" class="input" autocomplete="off"></label>
-    </div>
-  </div>
-
-  <div class="card times dark">
-    <div class="label tight">Times <span class="muted">· tap a time to correct it</span></div>
-    <div id="times"></div>
-    <div id="expected"></div>
-    <div id="logWrap" class="hidden">
-      <div class="label">Time corrections</div>
-      <ul id="log" class="log"></ul>
-    </div>
-  </div>
-
-  <div class="label" style="margin-top:18px">Audit checklist <span class="muted" id="scoreSub"></span></div>
-  <div id="checklist"></div>
-
-  <button id="btnPdfOne" class="btn wide pdf">📄 EXPORT THIS AUDIT — PDF</button>
-  <button id="btnDelete" class="btn wide danger">Delete this audit</button>
-  <footer class="owner">Developed by <b>Dr. Kiran Rajagopal</b></footer>
 </section>
 
 <!-- MODAL -->

@@ -28,6 +28,15 @@
   /* ---------- HOME ---------- */
   function shown() { return audits.filter(function (a) { return filter === 'All' || a.kind === filter; }); }
   function barCls(p) { return p == null ? '' : p >= 80 ? '' : p >= 60 ? 'mid' : 'low'; }
+  function ringCol(p) { return p == null ? 'none' : p >= 90 ? 'good' : p >= 75 ? 'mid' : 'low'; }
+  // circular gauge: percentage arc with the value in the middle
+  function ring(p, size, stroke, small) {
+    var r = (size - stroke) / 2, C = 2 * Math.PI * r, off = p == null ? C : C * (1 - p / 100);
+    return '<svg class="ring ' + ringCol(p) + '" viewBox="0 0 ' + size + ' ' + size + '" width="' + size + '" height="' + size + '" style="width:' + size + 'px;height:' + size + 'px">' +
+      '<circle class="trk" cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" stroke-width="' + stroke + '"/>' +
+      '<circle class="arc" cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" stroke-width="' + stroke + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + off.toFixed(2) + '" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')"/>' +
+      '<text x="50%" y="50%" dominant-baseline="central" text-anchor="middle">' + (p == null ? '—' : p + (small ? '' : '%')) + '</text></svg>';
+  }
   function tile(k, v, unit, sub, pct) {
     return '<div class="kpi"><div class="k">' + k + '</div><div class="v">' + (v == null ? '—' : v + '<small>' + unit + '</small>') + '</div>' +
       (pct != null ? '<div class="bar"><i class="' + barCls(pct) + '" style="width:' + pct + '%"></i></div>' : '') + '<div class="s">' + sub + '</div></div>';
@@ -36,28 +45,32 @@
   function renderHome() {
     Array.prototype.forEach.call(document.querySelectorAll('#filter button'), function (b) { b.classList.toggle('sel', b.dataset.f === filter); });
     var list = shown(), k = L.kpis(list, targets);
-    $('kpiCount').textContent = '· ' + k.count + (filter === 'All' ? ' (' + k.real + ' real, ' + k.mock + ' mock)' : ' ' + filter.toLowerCase());
+    $('kpiCount').textContent = filter === 'All' ? 'All audits' : filter + ' only';
+    $('heroRing').innerHTML = ring(k.compliance.mean, 104, 10);
+    $('hCount').textContent = k.count; $('hReal').textContent = k.real; $('hMock').textContent = k.mock;
+    var devs = list.reduce(function (s, a) { return s + L.compliance(a).n; }, 0);
     $('kpis').innerHTML =
       tile('Arrest → Code Blue', k.called.median, 'min', within(k.called, targets.called), k.called.within) +
       tile('Arrest → CPR', k.cpr.median, 'min', within(k.cpr, targets.cpr), k.cpr.within) +
       tile('Code Blue → team', k.team.median, 'min', within(k.team, targets.team), k.team.within) +
-      tile('Checklist compliance', k.compliance.mean, '%', k.compliance.n ? 'Mean of ' + k.compliance.n + ' · YES ÷ (YES+NO)' : 'No data yet', k.compliance.mean) +
+      tile('Deviations', list.length ? Math.round(devs / list.length * 10) / 10 : null, 'per audit', list.length ? '<b>' + devs + '</b> items marked NO in total' : 'No data yet', null) +
       tile('ROSC', k.outcome.roscPct, '%', k.outcome.ended ? '<b>' + k.outcome.rosc + '</b> ROSC · <b>' + k.outcome.death + '</b> death' : 'No ended codes', k.outcome.roscPct) +
       tile('Code duration', k.duration.median, 'min', k.duration.n ? 'Median, CPR → termination' : 'No ended codes', null);
     $('phaseCard').classList.toggle('hidden', !list.length);
     $('phases').innerHTML = k.sections.map(function (s, i) {
-      return '<div class="phase"><span>' + (i + 1) + '. ' + esc(s.name) + '</span><div class="bar" style="margin:0"><i class="' + barCls(s.pct) + '" style="width:' + (s.pct || 0) + '%"></i></div><span class="p">' + (s.pct == null ? '—' : s.pct + '%') + '</span></div>';
+      return '<div class="phase"><span class="pn">' + (i + 1) + '</span><span class="pl">' + esc(s.name) + '</span><span class="p">' + (s.pct == null ? '—' : s.pct + '%') + '</span><div class="bar"><i class="' + barCls(s.pct) + '" style="width:' + (s.pct || 0) + '%"></i></div></div>';
     }).join('');
     $('topNoWrap').classList.toggle('hidden', !k.topNo.length);
-    $('topNo').innerHTML = k.topNo.slice(0, 5).map(function (t) { return '<li>' + t.id + ' ' + esc(t.q) + ' · <b>' + t.count + '×</b></li>'; }).join('');
+    $('topNo').innerHTML = k.topNo.slice(0, 5).map(function (t) { return '<li><span class="tid">' + t.id + '</span><span class="tq">' + esc(t.q) + '</span><b>' + t.count + '×</b></li>'; }).join('');
     $('btnPdfAll').disabled = !list.length;
     $('list').innerHTML = list.length ? list.map(function (a) {
       var c = L.compliance(a);
       var st = a.status === 'closed' ? '<span class="pill ' + (a.outcome === 'ROSC' ? 'rosc' : 'death') + '">' + esc((a.outcome || 'ENDED').toUpperCase()) + '</span>' : '<span class="pill open">IN PROGRESS</span>';
-      return '<button class="h-item" data-open="' + a.id + '"><span class="pill ' + (a.kind === 'Mock' ? 'mock' : 'real') + '">' + a.kind.toUpperCase() + '</span>' +
-        '<span><span class="h-title">' + esc(a.location || 'Location not entered') + '</span><br><span class="h-sub">' + L.fmtDate(a.date) + ' · arrest ' + (L.fmt12(a.times.arrest) || '—') + (a.rhythm ? ' · ' + a.rhythm : '') + '</span></span>' +
-        '<span class="h-right"><span class="h-pct">' + (c.pct == null ? '—' : c.pct + '%') + '</span>' + st + '</span></button>';
-    }).join('') : '<div class="muted">No ' + (filter === 'All' ? '' : filter.toLowerCase() + ' ') + 'audits yet. Tap NEW AUDIT when a Code Blue or mock drill begins.</div>';
+      return '<button class="h-item" data-open="' + a.id + '"><span class="h-ring">' + ring(c.pct, 48, 5, true) + '</span>' +
+        '<span class="h-mid"><span class="h-title">' + esc(a.location || 'Location not entered') + '</span><span class="h-sub">' + L.fmtDate(a.date) + ' · ' + (L.fmt12(a.times.arrest) || '—') + (a.rhythm ? ' · ' + a.rhythm : '') + '</span>' +
+        '<span class="h-pills"><span class="pill ' + (a.kind === 'Mock' ? 'mock' : 'real') + '">' + a.kind.toUpperCase() + '</span>' + st + (c.n ? '<span class="pill dev">' + c.n + ' NO</span>' : '') + '</span></span>' +
+        '<svg class="h-chev"><use href="#i-back"/></svg></button>';
+    }).join('') : '<div class="empty"><svg><use href="#i-list"/></svg><b>No ' + (filter === 'All' ? '' : filter.toLowerCase() + ' ') + 'audits yet</b><span>Tap New audit when a Code Blue or mock drill begins.</span></div>';
     $('iosInstall').classList.toggle('hidden', !(IOS && !STANDALONE && !NATIVE));
   }
   $('filter').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; filter = b.dataset.f; save('cba.filter', filter); renderHome(); });
@@ -80,9 +93,15 @@
     renderTimes(); renderChecklist(); renderScore();
   }
   function renderScore() {
-    var c = L.compliance(cur());
-    $('scorePct').textContent = c.pct == null ? '—' : c.pct + '%';
-    $('scoreSub').textContent = '· mark only NO or N/A; unmarked = YES · ' + c.n + ' no · ' + c.na + ' N/A';
+    var a = cur(), c = L.compliance(a);
+    $('scoreRing').innerHTML = ring(c.pct, 46, 5, true);
+    $('scoreSub').innerHTML = 'Mark only <b>NO</b> or <b>N/A</b> — unmarked items are recorded as YES. <span class="cnt">' + c.n + ' NO · ' + c.na + ' N/A</span>';
+    renderHeader();
+  }
+  function renderHeader() {
+    var a = cur(); if (!a) return;
+    $('abTitle').textContent = a.location || (a.kind === 'Mock' ? 'Mock drill' : 'Real code');
+    $('abSub').textContent = (a.kind === 'Mock' ? 'Mock drill' : 'Real code') + ' · ' + L.fmtDate(a.date) + (a.rhythm ? ' · ' + a.rhythm : '');
   }
   function ivBadge(v, t, from) { if (v == null) return ''; return '<span class="iv ' + (v <= t ? 'ok' : 'bad') + '">' + L.fmtMin(v) + ' ' + from + ' · target ≤' + t + '</span>'; }
   function renderTimes() {
@@ -95,13 +114,13 @@
       if (T.key === 'adr' && iv.firstAdr != null) right = '<span class="iv">' + L.fmtMin(iv.firstAdr) + ' after arrest</span>';
       if (T.key === 'end') {
         if (a.status !== 'closed') return '<div class="trow"><div><div class="tname">' + T.label + '</div><div class="thint">Records the time and asks: ROSC or death?</div></div><div></div>' +
-          '<div class="tval"><button class="btn end wide" data-end style="margin:0">END CODE BLUE</button></div></div>';
+          '<div class="tval"><button class="btn end wide" data-end style="margin:0">End Code Blue</button></div></div>';
         right = '<span class="outcome ' + (a.outcome === 'ROSC' ? 'rosc' : 'death') + '">' + esc((a.outcome || '').toUpperCase()) + '</span>';
         return '<div class="trow"><div><div class="tname">' + T.label + '</div><div class="thint">' + (iv.duration != null ? 'Duration ' + L.fmtMin(iv.duration) + ' from CPR start' : T.hint) + '</div></div><div>' + right + '</div>' +
           '<div class="tval"><button class="tclock" data-edit="end">' + (L.fmt12(v) || 'Not set') + '</button><button class="btn" data-end>Change outcome</button></div></div>';
       }
       return '<div class="trow"><div><div class="tname">' + T.label + '</div><div class="thint">' + T.hint + '</div></div><div>' + right + '</div>' +
-        '<div class="tval"><button class="tclock' + (v ? '' : ' empty') + '" data-edit="' + T.key + '">' + (v ? L.fmt12(v) : 'Not set — tap to enter') + '</button><button class="tnow" data-now="' + T.key + '">NOW</button></div></div>';
+        '<div class="tval"><button class="tclock' + (v ? '' : ' empty') + '" data-edit="' + T.key + '">' + (v ? L.fmt12(v) : 'Not set — tap to enter') + '</button><button class="tnow" data-now="' + T.key + '">Now</button></div></div>';
     }).join('');
     var ex = L.expected(a);
     $('expected').innerHTML = (ex.cycles == null && ex.doses == null) ? '' :
@@ -122,10 +141,11 @@
   function renderChecklist() {
     var a = cur();
     $('checklist').innerHTML = L.SECTIONS.map(function (s, si) {
-      return '<div class="sec" data-sec="' + si + '"><h3>' + (si + 1) + '. ' + esc(s[0]) + '<small>' + secCount(a, s) + '</small></h3>' +
+      var sc = secCount(a, s);
+      return '<div class="sec" data-sec="' + si + '"><div class="sec-head"><span class="sec-no">' + (si + 1) + '</span><h3>' + esc(s[0]) + '</h3><small class="chip' + (/NO/.test(sc) ? ' bad' : '') + '">' + sc + '</small></div>' +
         s[1].map(function (i) {
           var v = a.checks[i[0]] || '', r = a.remarks[i[0]] || '';
-          return '<div class="it' + (v === 'N' ? ' isN' : '') + '" data-item="' + i[0] + '"><div class="q"><span class="n">' + i[0] + '</span><span>' + esc(i[1]) + '</span></div>' +
+          return '<div class="it' + (v === 'N' ? ' isN' : v === 'NA' ? ' isNA' : '') + '" data-item="' + i[0] + '"><div class="q"><span class="n">' + i[0] + '</span><span>' + esc(i[1]) + '</span></div>' +
             '<div class="yn">' + ['Y', 'N', 'NA'].map(function (k) { return '<button class="' + k + (v === k ? ' sel' : '') + '" data-yn="' + k + '" aria-pressed="' + (v === k) + '">' + L.ANS[k] + '</button>'; }).join('') + '</div>' +
             '<textarea rows="1" placeholder="Remarks" data-rem="' + i[0] + '" aria-label="Remarks for ' + i[0] + '">' + esc(r) + '</textarea></div>';
         }).join('') + '</div>';
@@ -134,8 +154,8 @@
 
   /* details */
   $('kindSeg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; var a = cur(); a.kind = b.dataset.kind; touch(a); renderAudit(); });
-  [['fDate', 'date'], ['fRhythm', 'rhythm']].forEach(function (p) { $(p[0]).addEventListener('change', function () { var a = cur(); a[p[1]] = this.value; touch(a); }); });
-  [['fLocation', 'location'], ['fLeader', 'leader'], ['fObservers', 'observers']].forEach(function (p) { $(p[0]).addEventListener('input', function () { var a = cur(); a[p[1]] = this.value; touch(a); }); });
+  [['fDate', 'date'], ['fRhythm', 'rhythm']].forEach(function (p) { $(p[0]).addEventListener('change', function () { var a = cur(); a[p[1]] = this.value; touch(a); renderHeader(); }); });
+  [['fLocation', 'location'], ['fLeader', 'leader'], ['fObservers', 'observers']].forEach(function (p) { $(p[0]).addEventListener('input', function () { var a = cur(); a[p[1]] = this.value; touch(a); renderHeader(); }); });
 
   /* times */
   $('times').addEventListener('click', function (e) {
@@ -194,7 +214,8 @@
     Array.prototype.forEach.call(row.querySelectorAll('[data-yn]'), function (x) { x.classList.toggle('sel', x.dataset.yn === nv); x.setAttribute('aria-pressed', x.dataset.yn === nv); });
     row.classList.toggle('isN', nv === 'N');
     var sec = row.closest('.sec'), si = +sec.dataset.sec, s = L.SECTIONS[si];
-    sec.querySelector('h3 small').textContent = secCount(a, s);
+    var chip = sec.querySelector('.sec-head .chip'), sc = secCount(a, s); chip.textContent = sc; chip.classList.toggle('bad', /NO/.test(sc));
+    row.classList.toggle('isNA', nv === 'NA');
     renderScore();
   });
   var remT = null;
@@ -258,9 +279,9 @@
     return Promise.resolve();
   }
   function busy(btn, label, fn) {
-    var old = btn.textContent; btn.disabled = true; btn.textContent = label;
+    var old = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span><span>' + label + '</span>';
     setTimeout(function () {
-      Promise.resolve().then(fn).catch(function (e) { toast('PDF error: ' + (e && e.message || e)); }).then(function () { btn.disabled = false; btn.textContent = old; });
+      Promise.resolve().then(fn).catch(function (e) { toast('PDF error: ' + (e && e.message || e)); }).then(function () { btn.disabled = false; btn.innerHTML = old; });
     }, 30);
   }
   $('btnPdfAll').addEventListener('click', function () {
