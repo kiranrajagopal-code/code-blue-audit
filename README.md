@@ -11,7 +11,7 @@ Quality-team app for auditing real and mock Code Blue events.
 - 82-point checklist in 9 phases, each item YES / NO / N/A with a remarks box; only NO and N/A need marking — unmarked items are recorded as YES
 - KPIs (all, real only, mock only): arrest → Code Blue, arrest → CPR, Code Blue → team (median and % within target), checklist compliance, ROSC rate, code duration, compliance by phase, items most often marked NO
 - Export PDF: the whole report (KPIs + summary of all audits + every audit in full) or a single audit
-- Backup / import file to move audits between phones or combine the quality team's phones
+- Backup / import file (email it to yourself or save to Drive) to restore audits or combine the quality team's phones; home screen shows the last backup date and a reminder appears after each completed audit
 - Works offline; audits are stored on the phone
 
 **Android:** open the latest release on your phone and download `AuditCodeBlue.apk`.

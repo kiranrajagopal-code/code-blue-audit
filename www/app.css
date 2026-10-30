@@ -222,3 +222,9 @@ svg{width:20px;height:20px;flex:none}
 
 @media (max-width:380px){.grid2{grid-template-columns:1fr}.big{font-size:58px}.tclock{width:110px;font-size:19px}.tnow{min-width:52px}.figs b{font-size:21px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.bstat{display:flex;align-items:center;gap:10px;margin-top:8px;padding:12px 14px;border-radius:12px;background:var(--sunk);font-size:13px;color:var(--muted);line-height:1.4}
+.bstat i{width:8px;height:8px;border-radius:50%;flex:none;background:var(--faint)}
+.bstat b{color:var(--ink);font-weight:600}
+.bstat.ok i{background:var(--green)}
+.bstat.warn i{background:var(--amber)}
+.bstat.bad{background:var(--red-l)}.bstat.bad i{background:var(--red)}.bstat.bad b{color:var(--red)}

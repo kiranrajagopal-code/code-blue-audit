@@ -75,6 +75,7 @@
         '<span class="h-pct">' + (c.pct == null ? '—' : c.pct + '<small>%</small>') + '</span></button>';
     }).join('') : '<div class="empty"><svg><use href="#i-list"/></svg><b>No ' + (filter === 'All' ? '' : filter.toLowerCase() + ' ') + 'audits yet</b><span>Tap New audit when a Code Blue or mock drill begins.</span></div>';
     $('iosInstall').classList.toggle('hidden', !(IOS && !STANDALONE && !NATIVE));
+    renderBackup();
   }
   $('filter').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; filter = b.dataset.f; save('cba.filter', filter); renderHome(); });
   $('list').addEventListener('click', function (e) { var b = e.target.closest('[data-open]'); if (b) openAudit(b.dataset.open); });
@@ -122,7 +123,7 @@
           '<button class="tclock" data-edit="end"><span>' + (L.fmt12(v) || 'Not set') + '</span></button><button class="tnow alt" data-end>Edit</button>', '');
       }
       return row(T.label, '',
-        '<button class="tclock' + (v ? '' : ' empty') + '" data-edit="' + T.key + '"><span>' + (v ? L.fmt12(v) : 'Not set — tap to enter') + '</span></button><button class="tnow" data-now="' + T.key + '">Now</button>', right);
+        '<button class="tclock' + (v ? '' : ' empty') + '" data-edit="' + T.key + '"><span>' + (v ? L.fmt12(v) : 'Tap to set') + '</span></button><button class="tnow" data-now="' + T.key + '">Now</button>', right);
     }).join('');
     var ex = L.expected(a);
     $('expected').innerHTML = (ex.cycles == null && ex.doses == null) ? '' :
@@ -203,6 +204,7 @@
       $('mOk').onclick = function () {
         L.setTime(a, 'end', pickerVal()); a.outcome = outcome; a.status = 'closed'; touch(a); closeModal(); renderTimes();
         toast('Code Blue ended · ' + outcome.toUpperCase());
+        setTimeout(backupPrompt, 700);
       };
     });
   }
@@ -274,16 +276,17 @@
       if (isText) { opts.data = data; opts.encoding = 'utf8'; } else opts.data = b64(data);
       return N.Filesystem.writeFile(opts)
         .then(function (r) { return N.Share.share({ title: name, dialogTitle: 'Save or share ' + name, files: [r.uri] }); })
-        .catch(function (e) { if (!/cancel/i.test(String(e && e.message))) toast('Could not share: ' + (e && e.message || e)); });
+        .then(function () { return true; })
+        .catch(function (e) { if (!/cancel/i.test(String(e && e.message))) toast('Could not share: ' + (e && e.message || e)); return false; });
     }
     // iPhone / browser: share sheet with the file, else download
     var blob = new Blob([data], { type: mime }), file = null;
     try { file = new File([blob], name, { type: mime }); } catch (e) {}
-    if (file && navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title: name }).catch(function () {});
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title: name }).then(function () { return true; }).catch(function () { return false; });
     var url = URL.createObjectURL(blob), aEl = document.createElement('a');
     aEl.href = url; aEl.download = name; document.body.appendChild(aEl); aEl.click(); aEl.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-    return Promise.resolve();
+    return Promise.resolve(true);
   }
   function busy(btn, label, fn) {
     var old = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span><span>' + label + '</span>';
@@ -305,11 +308,35 @@
       return shareFile(window.CBAPdf.oneName(a), 'application/pdf', doc.output('arraybuffer'));
     });
   });
-  $('btnBackup').addEventListener('click', function () {
-    if (!audits.length) { toast('No audits to back up yet'); return; }
-    var data = JSON.stringify({ app: 'code-blue-audit', version: 1, exportedAt: new Date().toISOString(), targets: targets, audits: audits });
-    shareFile('Audit Code Blue backup ' + L.todayISO() + '.json', 'application/json', data, true);
-  });
+  function doBackup() {
+    if (!audits.length) { toast('No audits to back up yet'); return Promise.resolve(false); }
+    var now = new Date().toISOString();
+    var data = JSON.stringify({ app: 'code-blue-audit', version: 1, exportedAt: now, targets: targets, audits: audits });
+    return shareFile('Audit Code Blue backup ' + L.todayISO() + '.json', 'application/json', data, true).then(function (ok) {
+      if (ok) { save('cba.lastBackup', now); renderBackup(); toast('Backup saved. Keep the file in your email or Drive.'); }
+      return ok;
+    });
+  }
+  $('btnBackup').addEventListener('click', doBackup);
+  // "Last backup" line: red when never backed up or older than 7 days
+  function renderBackup() {
+    var el = $('backupStatus'); if (!el) return;
+    var last = load('cba.lastBackup', null);
+    var changed = audits.filter(function (a) { return !last || (a.updatedAt || '') > last; }).length;
+    if (!audits.length) { el.className = 'bstat'; el.innerHTML = 'Back up regularly: email the file to yourself or save it to Drive.'; return; }
+    var days = last ? Math.floor((Date.now() - new Date(last).getTime()) / 86400000) : null;
+    var when = last == null ? 'Never backed up' : 'Last backup ' + (days === 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago');
+    var stale = last == null || days > 7;
+    el.className = 'bstat' + (stale ? ' bad' : changed ? ' warn' : ' ok');
+    el.innerHTML = '<i></i><span><b>' + when + '</b>' + (changed ? ' · ' + changed + ' audit' + (changed === 1 ? '' : 's') + ' not yet backed up' : ' · all audits backed up') + '</span>';
+  }
+  function backupPrompt() {
+    modal('<h2>Back up now?</h2><p>This audit is complete. Send the backup file to your own email or Google Drive, so the audits can be restored if this phone is lost or the app is removed.</p>' +
+      '<div class="mrow"><button class="btn" id="mCancel">Later</button><button class="btn pri" id="mOk">Back up</button></div>', function () {
+      $('mCancel').onclick = closeModal;
+      $('mOk').onclick = function () { closeModal(); doBackup(); };
+    });
+  }
   $('btnImport').addEventListener('click', function () { $('importFile').value = ''; $('importFile').click(); });
   $('importFile').addEventListener('change', function () {
     var f = this.files && this.files[0]; if (!f) return;
