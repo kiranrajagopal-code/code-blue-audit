@@ -108,10 +108,6 @@
     var a = cur(), t = a.times, iv = L.intervals(a);
     $('times').innerHTML = L.TIMES.map(function (T) {
       var v = t[T.key], right = '';
-      if (T.key === 'called') right = ivBadge(iv.called, targets.called, 'after arrest');
-      if (T.key === 'cpr') right = ivBadge(iv.cpr, targets.cpr, 'after arrest');
-      if (T.key === 'team') right = ivBadge(iv.team, targets.team, 'after Code Blue');
-      if (T.key === 'adr' && iv.firstAdr != null) right = '<span class="iv">' + L.fmtMin(iv.firstAdr) + ' after arrest</span>';
       // layout: label + hint, then the clock box with its button, then the interval badge below
       function row(head, hint, val, badge) {
         return '<div class="trow"><div class="thead"><div class="tname">' + head + '</div><div class="thint">' + hint + '</div></div>' +
@@ -150,8 +146,9 @@
         s[1].map(function (i) {
           var v = a.checks[i[0]] || '', r = a.remarks[i[0]] || '';
           return '<div class="it' + (v === 'N' ? ' isN' : v === 'NA' ? ' isNA' : '') + '" data-item="' + i[0] + '"><div class="q"><span class="n">' + i[0] + '</span><span>' + esc(i[1]) + '</span></div>' +
-            '<div class="yn">' + ['Y', 'N', 'NA'].map(function (k) { return '<button class="' + k + (v === k ? ' sel' : '') + '" data-yn="' + k + '" aria-pressed="' + (v === k) + '">' + L.ANS[k] + '</button>'; }).join('') + '</div>' +
-            '<textarea rows="1" placeholder="Remarks" data-rem="' + i[0] + '" aria-label="Remarks for ' + i[0] + '">' + esc(r) + '</textarea></div>';
+            '<div class="yn">' + ['Y', 'N', 'NA'].map(function (k) { return '<button class="' + k + (v === k ? ' sel' : '') + '" data-yn="' + k + '" aria-pressed="' + (v === k) + '">' + L.ANS[k] + '</button>'; }).join('') +
+            '<button class="note' + (r ? ' has' : '') + '" data-note aria-label="Add remark for ' + i[0] + '"><svg><use href="#i-note"/></svg></button></div>' +
+            '<textarea rows="1" placeholder="Remarks" data-rem="' + i[0] + '" aria-label="Remarks for ' + i[0] + '"' + (v === 'N' || v === 'NA' || r ? '' : ' class="hidden"') + '>' + esc(r) + '</textarea></div>';
         }).join('') + '</div>';
     }).join('');
   }
@@ -210,6 +207,8 @@
 
   /* checklist */
   $('checklist').addEventListener('click', function (e) {
+    var nb = e.target.closest('[data-note]');
+    if (nb) { var t = nb.closest('[data-item]').querySelector('textarea'); t.classList.toggle('hidden'); if (!t.classList.contains('hidden')) t.focus(); return; }
     var b = e.target.closest('[data-yn]'); if (!b) return;
     var a = cur(), row = b.closest('[data-item]'), id = row.dataset.item, v = b.dataset.yn;
     if (a.checks[id] === v) delete a.checks[id]; else a.checks[id] = v;
@@ -220,12 +219,14 @@
     var sec = row.closest('.sec'), si = +sec.dataset.sec, s = L.SECTIONS[si];
     var chip = sec.querySelector('.sec-head .chip'), sc = secCount(a, s); chip.textContent = sc; chip.classList.toggle('bad', /NO/.test(sc));
     row.classList.toggle('isNA', nv === 'NA');
+    var ta = row.querySelector('textarea'); if (nv === 'N' || nv === 'NA') ta.classList.remove('hidden'); else if (!ta.value) ta.classList.add('hidden');
     renderScore();
   });
   var remT = null;
   $('checklist').addEventListener('input', function (e) {
     var t = e.target; if (!t.dataset.rem) return;
     var a = cur(); if (t.value) a.remarks[t.dataset.rem] = t.value; else delete a.remarks[t.dataset.rem];
+    var nbtn = t.closest('[data-item]').querySelector('[data-note]'); if (nbtn) nbtn.classList.toggle('has', !!t.value);
     clearTimeout(remT); remT = setTimeout(function () { touch(a); }, 400);
   });
 
