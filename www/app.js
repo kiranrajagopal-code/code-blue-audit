@@ -112,15 +112,19 @@
       if (T.key === 'cpr') right = ivBadge(iv.cpr, targets.cpr, 'after arrest');
       if (T.key === 'team') right = ivBadge(iv.team, targets.team, 'after Code Blue');
       if (T.key === 'adr' && iv.firstAdr != null) right = '<span class="iv">' + L.fmtMin(iv.firstAdr) + ' after arrest</span>';
-      if (T.key === 'end') {
-        if (a.status !== 'closed') return '<div class="trow"><div><div class="tname">' + T.label + '</div><div class="thint">Records the time and asks: ROSC or death?</div></div><div></div>' +
-          '<div class="tval"><button class="btn end wide" data-end style="margin:0">End Code Blue</button></div></div>';
-        right = '<span class="outcome ' + (a.outcome === 'ROSC' ? 'rosc' : 'death') + '">' + esc((a.outcome || '').toUpperCase()) + '</span>';
-        return '<div class="trow"><div><div class="tname">' + T.label + '</div><div class="thint">' + (iv.duration != null ? 'Duration ' + L.fmtMin(iv.duration) + ' from CPR start' : T.hint) + '</div></div><div>' + right + '</div>' +
-          '<div class="tval"><button class="tclock" data-edit="end">' + (L.fmt12(v) || 'Not set') + '</button><button class="btn" data-end>Change outcome</button></div></div>';
+      // layout: label + hint, then the clock box with its button, then the interval badge below
+      function row(head, hint, val, badge) {
+        return '<div class="trow"><div class="thead"><div class="tname">' + head + '</div><div class="thint">' + hint + '</div></div>' +
+          '<div class="tval">' + val + '</div>' + (badge ? '<div class="tbadge">' + badge + '</div>' : '') + '</div>';
       }
-      return '<div class="trow"><div><div class="tname">' + T.label + '</div><div class="thint">' + T.hint + '</div></div><div>' + right + '</div>' +
-        '<div class="tval"><button class="tclock' + (v ? '' : ' empty') + '" data-edit="' + T.key + '">' + (v ? L.fmt12(v) : 'Not set — tap to enter') + '</button><button class="tnow" data-now="' + T.key + '">Now</button></div></div>';
+      if (T.key === 'end') {
+        if (a.status !== 'closed') return row(T.label, 'Records the time and asks: ROSC or death?', '<button class="btn end wide" data-end style="margin:0">End Code Blue</button>', '');
+        return row(T.label + ' <span class="outcome ' + (a.outcome === 'ROSC' ? 'rosc' : 'death') + '">' + esc((a.outcome || '').toUpperCase()) + '</span>',
+          iv.duration != null ? 'Duration ' + L.fmtMin(iv.duration) + ' from CPR start' : T.hint,
+          '<button class="tclock" data-edit="end"><span>' + (L.fmt12(v) || 'Not set') + '</span></button><button class="tnow alt" data-end>Outcome</button>', '');
+      }
+      return row(T.label, T.hint,
+        '<button class="tclock' + (v ? '' : ' empty') + '" data-edit="' + T.key + '"><span>' + (v ? L.fmt12(v) : 'Not set — tap to enter') + '</span></button><button class="tnow" data-now="' + T.key + '">Now</button>', right);
     }).join('');
     var ex = L.expected(a);
     $('expected').innerHTML = (ex.cycles == null && ex.doses == null) ? '' :
