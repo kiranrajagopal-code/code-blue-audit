@@ -44,7 +44,7 @@ def pictogram():
 
 art = pictogram()
 from PIL import ImageFilter, ImageChops
-TOP = (37, 99, 235); MID = (23, 64, 182); DEEP = (7, 22, 66)
+TOP = (34, 86, 214); MID = (19, 50, 140); DEEP = (9, 22, 58)
 FX = 'tools/fonts/jakarta-XB.ttf'; FM = 'tools/fonts/jakarta-M.ttf'
 
 def gradient(w, h):
@@ -58,7 +58,7 @@ def gradient(w, h):
             else: a, b, u = MID, DEEP, (t - 0.5) / 0.5
             px[x, y] = tuple(int(a[i] + (b[i] - a[i]) * u) for i in range(3))
     g = g.convert('RGBA')
-    glow = Image.new('L', (w, h), 0); ImageDraw.Draw(glow).ellipse([-w*0.35, -h*0.55, w*0.85, h*0.45], fill=70)
+    glow = Image.new('L', (w, h), 0); ImageDraw.Draw(glow).ellipse([-w*0.35, -h*0.55, w*0.85, h*0.45], fill=28)
     glow = glow.filter(ImageFilter.GaussianBlur(min(w, h) * 0.12))
     g.alpha_composite(Image.merge('RGBA', (Image.new('L', (w, h), 255),) * 3 + (glow,)))
     return g

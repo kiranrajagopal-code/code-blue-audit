@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1d51">
+<meta name="theme-color" content="#ffffff">
 <title>Audit Code Blue</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Audit Code Blue">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
@@ -33,56 +33,61 @@
 
 <!-- HOME -->
 <section id="home" class="screen">
-  <header class="hero">
-    <div class="hero-top">
-      <img class="app-ico" src="icons/icon-192.png" alt="">
-      <div class="brand"><h1>Audit Code Blue</h1><p>Code Blue quality audit</p></div>
-      <button class="icon-btn" id="btnTargets" aria-label="KPI targets"><svg><use href="#i-gear"/></svg></button>
-    </div>
-    <div class="hero-stats">
-      <div id="heroRing" class="hero-ring"></div>
-      <div class="hero-figs">
-        <div class="hero-cap">Checklist compliance</div>
-        <div class="figs"><div><b id="hCount">0</b><span>Audits</span></div><div><b id="hReal">0</b><span>Real</span></div><div><b id="hMock">0</b><span>Mock</span></div></div>
-      </div>
-    </div>
-    <button id="btnNew" class="cta"><svg><use href="#i-plus"/></svg>New audit</button>
+  <header class="top">
+    <img class="app-ico" src="icons/icon-192.png" alt="">
+    <div class="brand"><span class="eyebrow">Code Blue quality audit</span><h1>Audit Code Blue</h1></div>
+    <button class="icon-btn" id="btnTargets" aria-label="KPI targets"><svg><use href="#i-gear"/></svg></button>
   </header>
 
   <div class="wrap">
+    <section class="summary">
+      <div class="eyebrow">Checklist compliance</div>
+      <div class="big" id="heroPct">—</div>
+      <div class="track"><i id="heroBar"></i></div>
+      <div class="figs">
+        <div><b id="hCount">0</b><span>Audits</span></div>
+        <div><b id="hReal">0</b><span>Real codes</span></div>
+        <div><b id="hMock">0</b><span>Mock drills</span></div>
+      </div>
+    </section>
+
+    <button id="btnNew" class="cta"><svg><use href="#i-plus"/></svg>New audit</button>
+
     <div class="seg" id="filter" role="group" aria-label="Show">
       <button data-f="All" class="sel">All</button><button data-f="Real">Real</button><button data-f="Mock">Mock</button>
     </div>
 
     <div class="sec-title">Key indicators <span id="kpiCount"></span></div>
-    <div class="kpis" id="kpis"></div>
+    <div class="panel kpis" id="kpis"></div>
 
-    <div class="card" id="phaseCard">
-      <div class="card-title">Compliance by phase</div>
-      <div id="phases"></div>
+    <div id="phaseCard">
+      <div class="sec-title">Compliance by phase</div>
+      <div class="panel" id="phases"></div>
       <div id="topNoWrap" class="hidden">
-        <div class="card-title sub">Most often marked NO</div>
-        <ol id="topNo" class="topno"></ol>
+        <div class="sec-title">Most often marked NO</div>
+        <ol id="topNo" class="panel topno"></ol>
       </div>
     </div>
 
-    <button id="btnPdfAll" class="btn wide pdf"><svg><use href="#i-doc"/></svg><span>Export all — PDF report</span></button>
-    <div class="row2">
-      <button id="btnBackup" class="btn ghost"><svg><use href="#i-down"/></svg><span>Backup data</span></button>
-      <button id="btnImport" class="btn ghost"><svg><use href="#i-up"/></svg><span>Import backup</span></button>
+    <div class="sec-title">Audits</div>
+    <div id="list" class="panel history"></div>
+
+    <div class="actions">
+      <button id="btnPdfAll" class="btn primary"><svg><use href="#i-doc"/></svg><span>Export all as PDF</span></button>
+      <div class="row2">
+        <button id="btnBackup" class="btn"><svg><use href="#i-down"/></svg><span>Backup data</span></button>
+        <button id="btnImport" class="btn"><svg><use href="#i-up"/></svg><span>Import backup</span></button>
+      </div>
     </div>
     <input type="file" id="importFile" accept=".json,application/json" class="hidden">
 
-    <div class="sec-title">Audits</div>
-    <div id="list" class="history"></div>
-
-    <div id="iosInstall" class="card warn hidden">
+    <div id="iosInstall" class="note-card hidden">
       <b>Install on iPhone</b>
       <p>In Safari, tap <b>Share</b> <span class="ios-share">⬆</span> → <b>Add to Home Screen</b> → <b>Add</b>. Then open Audit Code Blue from the home screen icon. Audits are saved on this phone; use Backup to keep a copy.</p>
     </div>
     <p class="disclaimer">Audits are stored on this device only. Use Backup data regularly.</p>
+    <footer class="owner">Developed by <b>Dr. Kiran Rajagopal</b></footer>
   </div>
-  <footer class="owner fixed">Developed by <b>Dr. Kiran Rajagopal</b></footer>
 </section>
 
 <!-- AUDIT -->
@@ -94,7 +99,7 @@
   </header>
 
   <div class="wrap">
-    <div class="card">
+    <div class="panel pad">
       <div class="seg" id="kindSeg" role="group" aria-label="Type">
         <button data-kind="Real">Real code</button><button data-kind="Mock">Mock drill</button>
       </div>
@@ -110,7 +115,7 @@
       </div>
     </div>
 
-    <div class="card times dark">
+    <div class="times dark">
       <div class="times-head"><svg><use href="#i-clock"/></svg><b>Times</b><span>Tap a time to correct it</span></div>
       <div id="times"></div>
       <div id="expected"></div>
@@ -124,8 +129,8 @@
     <div class="hint" id="scoreSub"></div>
     <div id="checklist"></div>
 
-    <button id="btnPdfOne" class="btn wide pdf"><svg><use href="#i-doc"/></svg><span>Export this audit — PDF</span></button>
-    <button id="btnDelete" class="btn wide danger"><svg><use href="#i-trash"/></svg><span>Delete this audit</span></button>
+    <button id="btnPdfOne" class="btn primary wide"><svg><use href="#i-doc"/></svg><span>Export this audit as PDF</span></button>
+    <button id="btnDelete" class="btn danger wide"><svg><use href="#i-trash"/></svg><span>Delete this audit</span></button>
     <footer class="owner">Developed by <b>Dr. Kiran Rajagopal</b></footer>
   </div>
 </section>

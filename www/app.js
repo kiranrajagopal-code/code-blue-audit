@@ -37,39 +37,42 @@
       '<circle class="arc" cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" stroke-width="' + stroke + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + off.toFixed(2) + '" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')"/>' +
       '<text x="50%" y="50%" dominant-baseline="central" text-anchor="middle">' + (p == null ? '—' : p + (small ? '' : '%')) + '</text></svg>';
   }
+  // indicator row: label + context on the left, the figure on the right; a dot marks on/off target
   function tile(k, v, unit, sub, pct) {
-    return '<div class="kpi"><div class="k">' + k + '</div><div class="v">' + (v == null ? '—' : v + '<small>' + unit + '</small>') + '</div>' +
-      (pct != null ? '<div class="bar"><i class="' + barCls(pct) + '" style="width:' + pct + '%"></i></div>' : '') + '<div class="s">' + sub + '</div></div>';
+    var dot = pct == null ? '' : '<i class="dot ' + (pct >= 80 ? 'ok' : pct >= 60 ? 'mid' : 'low') + '"></i>';
+    return '<div class="kpi"><div class="kl"><div class="k">' + dot + k + '</div><div class="s">' + sub + '</div></div>' +
+      '<div class="v">' + (v == null ? '—' : v + '<small>' + unit + '</small>') + '</div></div>';
   }
-  function within(x, t) { return x.n ? '<b>' + x.within + '%</b> within ' + t + ' min · n=' + x.n : 'No data yet'; }
+  function within(x, t) { return x.n ? x.within + '% within ' + t + ' min · ' + x.n + ' audit' + (x.n === 1 ? '' : 's') : 'No data yet'; }
   function renderHome() {
     Array.prototype.forEach.call(document.querySelectorAll('#filter button'), function (b) { b.classList.toggle('sel', b.dataset.f === filter); });
     var list = shown(), k = L.kpis(list, targets);
     $('kpiCount').textContent = filter === 'All' ? 'All audits' : filter + ' only';
-    $('heroRing').innerHTML = ring(k.compliance.mean, 104, 10);
+    var cm = k.compliance.mean;
+    $('heroPct').innerHTML = cm == null ? '—' : cm + '<small>%</small>';
+    $('heroBar').style.width = (cm || 0) + '%'; $('heroBar').className = cm == null ? '' : cm >= 90 ? 'ok' : cm >= 75 ? 'mid' : 'low';
     $('hCount').textContent = k.count; $('hReal').textContent = k.real; $('hMock').textContent = k.mock;
     var devs = list.reduce(function (s, a) { return s + L.compliance(a).n; }, 0);
     $('kpis').innerHTML =
       tile('Arrest → Code Blue', k.called.median, 'min', within(k.called, targets.called), k.called.within) +
       tile('Arrest → CPR', k.cpr.median, 'min', within(k.cpr, targets.cpr), k.cpr.within) +
       tile('Code Blue → team', k.team.median, 'min', within(k.team, targets.team), k.team.within) +
-      tile('Deviations', list.length ? Math.round(devs / list.length * 10) / 10 : null, 'per audit', list.length ? '<b>' + devs + '</b> items marked NO in total' : 'No data yet', null) +
-      tile('ROSC', k.outcome.roscPct, '%', k.outcome.ended ? '<b>' + k.outcome.rosc + '</b> ROSC · <b>' + k.outcome.death + '</b> death' : 'No ended codes', k.outcome.roscPct) +
+      tile('Deviations', list.length ? Math.round(devs / list.length * 10) / 10 : null, 'per audit', list.length ? devs + ' items marked NO in total' : 'No data yet', null) +
+      tile('ROSC', k.outcome.roscPct, '%', k.outcome.ended ? k.outcome.rosc + ' ROSC · ' + k.outcome.death + ' death' : 'No ended codes', null) +
       tile('Code duration', k.duration.median, 'min', k.duration.n ? 'Median, CPR → termination' : 'No ended codes', null);
     $('phaseCard').classList.toggle('hidden', !list.length);
     $('phases').innerHTML = k.sections.map(function (s, i) {
-      return '<div class="phase"><span class="pn">' + (i + 1) + '</span><span class="pl">' + esc(s.name) + '</span><span class="p">' + (s.pct == null ? '—' : s.pct + '%') + '</span><div class="bar"><i class="' + barCls(s.pct) + '" style="width:' + (s.pct || 0) + '%"></i></div></div>';
+      return '<div class="phase"><span class="pn">' + (i + 1) + '</span><span class="pl">' + esc(s.name) + '</span><span class="p' + (s.pct != null && s.pct < 80 ? ' low' : '') + '">' + (s.pct == null ? '—' : s.pct + '%') + '</span><div class="bar"><i class="' + barCls(s.pct) + '" style="width:' + (s.pct || 0) + '%"></i></div></div>';
     }).join('');
     $('topNoWrap').classList.toggle('hidden', !k.topNo.length);
     $('topNo').innerHTML = k.topNo.slice(0, 5).map(function (t) { return '<li><span class="tid">' + t.id + '</span><span class="tq">' + esc(t.q) + '</span><b>' + t.count + '×</b></li>'; }).join('');
     $('btnPdfAll').disabled = !list.length;
     $('list').innerHTML = list.length ? list.map(function (a) {
       var c = L.compliance(a);
-      var st = a.status === 'closed' ? '<span class="pill ' + (a.outcome === 'ROSC' ? 'rosc' : 'death') + '">' + esc((a.outcome || 'ENDED').toUpperCase()) + '</span>' : '<span class="pill open">IN PROGRESS</span>';
-      return '<button class="h-item" data-open="' + a.id + '"><span class="h-ring">' + ring(c.pct, 48, 5, true) + '</span>' +
-        '<span class="h-mid"><span class="h-title">' + esc(a.location || 'Location not entered') + '</span><span class="h-sub">' + L.fmtDate(a.date) + ' · ' + (L.fmt12(a.times.arrest) || '—') + (a.rhythm ? ' · ' + a.rhythm : '') + '</span>' +
-        '<span class="h-pills"><span class="pill ' + (a.kind === 'Mock' ? 'mock' : 'real') + '">' + a.kind.toUpperCase() + '</span>' + st + (c.n ? '<span class="pill dev">' + c.n + ' NO</span>' : '') + '</span></span>' +
-        '<svg class="h-chev"><use href="#i-back"/></svg></button>';
+      var st = a.status === 'closed' ? (a.outcome === 'ROSC' ? 'ROSC' : 'Death') : 'In progress';
+      return '<button class="h-item" data-open="' + a.id + '"><span class="h-kind ' + (a.kind === 'Mock' ? 'mock' : 'real') + '">' + (a.kind === 'Mock' ? 'M' : 'R') + '</span>' +
+        '<span class="h-mid"><span class="h-title">' + esc(a.location || 'Location not entered') + '</span><span class="h-sub">' + L.fmtDate(a.date) + ' · ' + (L.fmt12(a.times.arrest) || '—') + ' · ' + st + (c.n ? ' · <em>' + c.n + ' NO</em>' : '') + '</span></span>' +
+        '<span class="h-pct">' + (c.pct == null ? '—' : c.pct + '<small>%</small>') + '</span></button>';
     }).join('') : '<div class="empty"><svg><use href="#i-list"/></svg><b>No ' + (filter === 'All' ? '' : filter.toLowerCase() + ' ') + 'audits yet</b><span>Tap New audit when a Code Blue or mock drill begins.</span></div>';
     $('iosInstall').classList.toggle('hidden', !(IOS && !STANDALONE && !NATIVE));
   }
@@ -94,8 +97,8 @@
   }
   function renderScore() {
     var a = cur(), c = L.compliance(a);
-    $('scoreRing').innerHTML = ring(c.pct, 46, 5, true);
-    $('scoreSub').innerHTML = 'Mark only <b>NO</b> or <b>N/A</b> — unmarked items are recorded as YES. <span class="cnt">' + c.n + ' NO · ' + c.na + ' N/A</span>';
+    $('scoreRing').innerHTML = '<b>' + (c.pct == null ? '—' : c.pct + '<small>%</small>') + '</b><span>compliance</span>';
+    $('scoreSub').innerHTML = 'Mark only <b>NO</b> or <b>N/A</b>. Unmarked items are recorded as YES.' + (c.n || c.na ? ' <span class="cnt">' + c.n + ' NO · ' + c.na + ' N/A</span>' : '');
     renderHeader();
   }
   function renderHeader() {
@@ -110,16 +113,15 @@
       var v = t[T.key], right = '';
       // layout: label + hint, then the clock box with its button, then the interval badge below
       function row(head, hint, val, badge) {
-        return '<div class="trow"><div class="thead"><div class="tname">' + head + '</div><div class="thint">' + hint + '</div></div>' +
+        return '<div class="trow"><div class="thead"><div class="tname">' + head + '</div>' + (hint ? '<div class="thint">' + hint + '</div>' : '') + '</div>' +
           '<div class="tval">' + val + '</div>' + (badge ? '<div class="tbadge">' + badge + '</div>' : '') + '</div>';
       }
       if (T.key === 'end') {
-        if (a.status !== 'closed') return row(T.label, 'Records the time and asks: ROSC or death?', '<button class="btn end wide" data-end style="margin:0">End Code Blue</button>', '');
-        return row(T.label + ' <span class="outcome ' + (a.outcome === 'ROSC' ? 'rosc' : 'death') + '">' + esc((a.outcome || '').toUpperCase()) + '</span>',
-          iv.duration != null ? 'Duration ' + L.fmtMin(iv.duration) + ' from CPR start' : T.hint,
-          '<button class="tclock" data-edit="end"><span>' + (L.fmt12(v) || 'Not set') + '</span></button><button class="tnow alt" data-end>Outcome</button>', '');
+        if (a.status !== 'closed') return row('Termination', 'ROSC or death', '<button class="tend" data-end>End Code Blue</button>', '');
+        return row('Termination', '<span class="outcome ' + (a.outcome === 'ROSC' ? 'rosc' : 'death') + '">' + esc((a.outcome || '').toUpperCase()) + '</span>' + (iv.duration != null ? ' ' + iv.duration + ' min' : ''),
+          '<button class="tclock" data-edit="end"><span>' + (L.fmt12(v) || 'Not set') + '</span></button><button class="tnow alt" data-end>Edit</button>', '');
       }
-      return row(T.label, T.hint,
+      return row(T.label, '',
         '<button class="tclock' + (v ? '' : ' empty') + '" data-edit="' + T.key + '"><span>' + (v ? L.fmt12(v) : 'Not set — tap to enter') + '</span></button><button class="tnow" data-now="' + T.key + '">Now</button>', right);
     }).join('');
     var ex = L.expected(a);
