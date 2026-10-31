@@ -233,3 +233,7 @@ input[type=date].input{-webkit-appearance:none;appearance:none;display:block;min
 input[type=date].input::-webkit-date-and-time-value{text-align:left;margin:0}
 input[type=date].input::-webkit-calendar-picker-indicator{margin-left:0}
 .grid2>*{min-width:0}
+/* iPhone: the native date control cannot be narrowed reliably, so Date and Rhythm get a full row each */
+.fld{overflow:hidden}
+.ios .date-row{grid-template-columns:1fr}
+.ios input[type=date].input{width:100%}

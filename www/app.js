@@ -9,6 +9,7 @@
   var N = window.CBNative || {};
   var NATIVE = !!(N.Capacitor && N.Capacitor.isNativePlatform());
   var IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (IOS) document.documentElement.classList.add('ios');
   var STANDALONE = !!(navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
 
   /* storage (on this device) */
