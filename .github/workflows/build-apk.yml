@@ -47,12 +47,20 @@ jobs:
       - name: Sync web app into Android
         run: npx cap sync android
 
-      - name: Fixed signing key (so updates install over the old app)
+      - name: Fixed signing key (same key every build, so updates install over the old app)
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
         run: |
-          mkdir -p ~/.android
-          if [ -n "$KEYSTORE_B64" ]; then echo "$KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore; else base64 -d signing/app-signing.b64 > ~/.android/debug.keystore; fi
+          if [ -n "$KEYSTORE_B64" ]; then echo "$KEYSTORE_B64" | base64 -d > "$GITHUB_WORKSPACE/app.keystore"; else base64 -d signing/app-signing.b64 > "$GITHUB_WORKSPACE/app.keystore"; fi
+          python3 - <<'PY'
+          import os, re
+          p = 'android/app/build.gradle'; s = open(p).read()
+          ks = os.environ['GITHUB_WORKSPACE'] + '/app.keystore'
+          cfg = "\n    signingConfigs {\n        debug {\n            storeFile file('%s')\n            storePassword 'android'\n            keyAlias 'androiddebugkey'\n            keyPassword 'android'\n        }\n    }\n" % ks
+          s = re.sub(r'^android \{', 'android {' + cfg, s, count=1, flags=re.M)
+          open(p, 'w').write(s)
+          PY
+          grep -n -A6 "signingConfigs" android/app/build.gradle
 
       - name: Build APK
         working-directory: android
