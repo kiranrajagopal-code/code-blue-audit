@@ -228,3 +228,8 @@ svg{width:20px;height:20px;flex:none}
 .bstat.ok i{background:var(--green)}
 .bstat.warn i{background:var(--amber)}
 .bstat.bad{background:var(--red-l)}.bstat.bad i{background:var(--red)}.bstat.bad b{color:var(--red)}
+/* iPhone Safari: date fields ignore width:100% and spill into the next column */
+input[type=date].input{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;height:46px;line-height:26px;text-align:left}
+input[type=date].input::-webkit-date-and-time-value{text-align:left;margin:0}
+input[type=date].input::-webkit-calendar-picker-indicator{margin-left:0}
+.grid2>*{min-width:0}
