@@ -23,7 +23,7 @@
   function touch(a) { a.updatedAt = new Date().toISOString(); persist(); }
 
   var toastT = null;
-  function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.remove('hidden'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.add('hidden'); }, 2600); }
+  function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.remove('hidden'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.add('hidden'); }, 1800); }
 
   /* ---------- HOME ---------- */
   function shown() { return audits.filter(function (a) { return filter === 'All' || a.kind === filter; }); }
@@ -81,7 +81,7 @@
   $('list').addEventListener('click', function (e) { var b = e.target.closest('[data-open]'); if (b) openAudit(b.dataset.open); });
   $('btnNew').addEventListener('click', function () {
     var a = L.newAudit(); if (filter === 'Mock') a.kind = 'Mock';
-    audits.unshift(a); persist(); openAudit(a.id); toast('New audit started · arrest time set to now');
+    audits.unshift(a); persist(); openAudit(a.id);
   });
 
   /* ---------- AUDIT ---------- */
@@ -167,7 +167,7 @@
     if (b.dataset.now) {
       var k = b.dataset.now, had = a.times[k];
       L.setTime(a, k, L.nowHM()); touch(a); renderTimes();
-      toast(had ? 'Time updated — previous time kept in corrections' : 'Time recorded');
+      if (had) toast('Time updated · previous time kept in corrections');
     } else if (b.dataset.edit) timeModal(b.dataset.edit);
     else if (b.hasAttribute('data-end')) endModal();
   });
